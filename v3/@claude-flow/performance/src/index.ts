@@ -34,5 +34,30 @@ export {
   type PerformanceTarget,
 } from './framework/benchmark.js';
 
+// Re-export Flash Attention integration
+export {
+  FlashAttentionOptimizer,
+  createFlashAttentionOptimizer,
+  quickBenchmark,
+  type AttentionInput,
+  type AttentionOutput,
+  type BenchmarkResult as AttentionBenchmarkResult,
+  type PerformanceMetrics as AttentionMetrics,
+} from './attention-integration.js';
+
+// Re-export Flash Attention benchmarks
+export {
+  AttentionBenchmarkRunner,
+  formatBenchmarkTable,
+  formatSuiteReport,
+  formatMemoryProfile,
+  quickValidation,
+  runAndDisplaySuite,
+  runAndDisplayMemoryProfile,
+  type ComparisonBenchmark,
+  type SuiteResult,
+  type MemoryProfile,
+} from './attention-benchmarks.js';
+
 // Default export for convenience
 export { default } from './framework/benchmark.js';
