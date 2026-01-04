@@ -412,9 +412,9 @@ Dim    Keys    Flash (KB)  Baseline (KB)  Reduction
 /**
  * Quick performance validation
  */
-export async function quickValidation(): Promise<boolean> {
+export function quickValidation(): boolean {
   const runner = new AttentionBenchmarkRunner();
-  const validation = await runner.validateV3Targets();
+  const validation = runner.validateV3Targets();
 
   console.log(`
 V3 Performance Target Validation
