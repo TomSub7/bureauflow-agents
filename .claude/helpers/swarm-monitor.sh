@@ -159,10 +159,16 @@ check_once() {
 
     if [ "$agent_count" -gt 0 ] || [ "$agentic_count" -gt 0 ]; then
         success "✓ Swarm activity detected and metrics updated"
-        return 0
     else
         warn "⚠ No swarm activity detected"
-        return 1
+    fi
+
+    # Run performance benchmarks (throttled to every 5 min)
+    if [ -x "$SCRIPT_DIR/perf-worker.sh" ]; then
+        "$SCRIPT_DIR/perf-worker.sh" check 2>/dev/null &
+    fi
+
+    return 0
     fi
 }
 
