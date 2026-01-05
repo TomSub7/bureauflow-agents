@@ -177,6 +177,11 @@
           },
           {
             "type": "command",
+            "timeout": 8000,
+            "command": ".claude/helpers/learning-hooks.sh session-start 2>/dev/null || true"
+          },
+          {
+            "type": "command",
             "timeout": 5000,
             "command": "npx agentic-flow@alpha hooks intelligence stats --json --v3-mode --load-v3-patterns 2>/dev/null || true"
           }
@@ -186,6 +191,11 @@
     "SessionEnd": [
       {
         "hooks": [
+          {
+            "type": "command",
+            "timeout": 10000,
+            "command": ".claude/helpers/learning-hooks.sh session-end 2>/dev/null || true"
+          },
           {
             "type": "command",
             "timeout": 8000,
