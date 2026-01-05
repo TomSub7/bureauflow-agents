@@ -919,16 +919,35 @@ export class AgentDBBackend extends EventEmitter implements IMemoryBackend {
   }
 
   /**
-   * Convert numeric ID back to string (placeholder)
+   * Convert numeric ID back to string using O(1) reverse lookup
+   * PERFORMANCE FIX: Uses pre-built reverse map instead of O(n) linear scan
    */
   private numericIdToString(numericId: number): string {
-    // In practice, maintain a bidirectional map
-    for (const [id, entry] of this.entries) {
-      if (this.stringIdToNumeric(id) === numericId) {
-        return id;
-      }
+    // Use O(1) reverse lookup map
+    const stringId = this.numericToStringIdMap.get(numericId);
+    if (stringId) {
+      return stringId;
     }
+    // Fallback for unmapped IDs
     return String(numericId);
+  }
+
+  /**
+   * Register string ID in reverse lookup map
+   * Called when storing entries to maintain bidirectional mapping
+   */
+  private registerIdMapping(stringId: string): void {
+    const numericId = this.stringIdToNumeric(stringId);
+    this.numericToStringIdMap.set(numericId, stringId);
+  }
+
+  /**
+   * Unregister string ID from reverse lookup map
+   * Called when deleting entries
+   */
+  private unregisterIdMapping(stringId: string): void {
+    const numericId = this.stringIdToNumeric(stringId);
+    this.numericToStringIdMap.delete(numericId);
   }
 
   /**
