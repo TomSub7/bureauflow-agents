@@ -543,7 +543,9 @@ export class FederationHub extends EventEmitter {
     const agent = this.ephemeralAgents.get(agentId);
     if (!agent) return false;
 
+    const oldStatus = agent.status;
     agent.status = 'terminated';
+    this.updateAgentStatusIndex(agent, oldStatus);
     agent.completedAt = new Date();
 
     if (error) {
