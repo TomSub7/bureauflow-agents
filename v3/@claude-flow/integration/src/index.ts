@@ -274,6 +274,27 @@ export {
   IntegrationError,
 } from './types.js';
 
+// ===== Multi-Model Router (Cost Optimization) =====
+export {
+  MultiModelRouter,
+  createMultiModelRouter,
+  getDefaultMultiModelRouter,
+} from './multi-model-router.js';
+
+export type {
+  ProviderType as RouterProviderType,
+  ModelConfig,
+  ProviderConfig,
+  RoutingRule,
+  RoutingMode,
+  CacheConfig,
+  BudgetConfig,
+  MultiModelRouterConfig,
+  RouteRequest,
+  RouteResult,
+  RouterStats,
+} from './multi-model-router.js';
+
 // ===== Quick Start Utilities =====
 
 /**
