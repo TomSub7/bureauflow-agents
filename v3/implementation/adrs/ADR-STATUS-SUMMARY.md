@@ -135,19 +135,69 @@
 
 ---
 
-## Remaining Work
+## Minor Items - Completed (2026-01-07)
 
-### Minor Items
-- CLI→MCP command mappings (documentation-level)
-- Process forking for daemon (`start.ts:219`)
-- Attention integration in ReasoningBank plugin
+| Item | Status | Implementation |
+|------|--------|----------------|
+| Process forking for daemon | ✅ Complete | `start.ts:219-242` - stream unref, heartbeat interval |
+| Attention integration in ReasoningBank | ✅ Complete | `reasoning-bank.ts` - `setEmbeddingProvider()`, `generateEmbeddingAsync()` |
+| CLI→MCP command mappings | ✅ Complete | Documentation in ADR-005 |
 
-### Future Phases (ADR-017)
-- RuVector route command
-- RuVector analyze command (AST, diff, boundaries)
-- Coverage-aware routing
+---
+
+## ADR-016 Claims System - Completed (2026-01-07)
+
+| Component | Status | Implementation |
+|-----------|--------|----------------|
+| ClaimService | ✅ Complete | `claim-service.ts` (~600 lines) |
+| Issues CLI Command | ✅ Complete | `issues.ts` (~450 lines) with 10 subcommands |
+| Work Stealing | ✅ Complete | steal, contest, markStealable methods |
+| Load Balancing | ✅ Complete | rebalance, getAgentLoad methods |
+| Event Sourcing | ✅ Complete | ClaimEvent types for all state changes |
+
+---
+
+## RuVector Features - Completed (2026-01-07)
+
+### Route Command (678 lines)
+| Subcommand | Description |
+|------------|-------------|
+| `route task` | Q-Learning agent routing |
+| `route list-agents` | List 8 agent types |
+| `route stats` | Router statistics |
+| `route feedback` | Learning feedback |
+| `route reset/export/import` | State management |
+
+### Analyze Command (2114 lines)
+| Subcommand | Algorithm |
+|------------|-----------|
+| `analyze ast` | tree-sitter (regex fallback) |
+| `analyze complexity` | McCabe + cognitive |
+| `analyze diff` | Pattern matching + risk |
+| `analyze boundaries` | MinCut algorithm |
+| `analyze modules` | Louvain community detection |
+| `analyze circular` | Tarjan's SCC |
+
+---
+
+## Final Package Versions
+
+| Package | Version | Published |
+|---------|---------|-----------|
+| claude-flow | 3.0.0-alpha.18 | 2026-01-07 |
+| @claude-flow/cli | 3.0.0-alpha.25 | 2026-01-07 |
+| @claude-flow/memory | 3.0.0-alpha.2 | 2026-01-07 |
+| @claude-flow/mcp | 3.0.0-alpha.8 | 2026-01-07 |
+| @claude-flow/neural | 3.0.0-alpha.2 | 2026-01-06 |
+| @claude-flow/security | 3.0.0-alpha.1 | 2026-01-05 |
+| @claude-flow/swarm | 3.0.0-alpha.1 | 2026-01-04 |
+| @claude-flow/hooks | 3.0.0-alpha.2 | 2026-01-06 |
+| @claude-flow/plugins | 3.0.0-alpha.2 | 2026-01-06 |
+| @claude-flow/providers | 3.0.0-alpha.1 | 2026-01-04 |
+| @claude-flow/embeddings | 3.0.0-alpha.12 | 2026-01-05 |
+| @claude-flow/shared | 3.0.0-alpha.1 | 2026-01-03 |
 
 ---
 
 **Document Maintained By:** Architecture Team
-**Status:** ✅ V3 Core Complete
+**Status:** ✅ V3 All ADRs Complete (17/17)
