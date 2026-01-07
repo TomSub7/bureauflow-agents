@@ -42,7 +42,13 @@
     "@types/node": "^20.10.0"
   },
   "peerDependencies": {
-    "@claude-flow/shared": "^3.0.0-alpha.1"
+    "@claude-flow/shared": "^3.0.0-alpha.1",
+    "agentic-flow": "^1.0.0"
+  },
+  "peerDependenciesMeta": {
+    "agentic-flow": {
+      "optional": true
+    }
   },
   "engines": {
     "node": ">=20.0.0"
