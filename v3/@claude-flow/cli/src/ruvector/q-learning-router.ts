@@ -4,8 +4,18 @@
  * Uses reinforcement learning to optimize task routing decisions
  * based on historical performance and context.
  *
+ * Features:
+ * - Caching for repeated task patterns (LRU cache)
+ * - Optimized state space with feature hashing
+ * - Epsilon decay with exponential annealing
+ * - Experience replay buffer for stable learning
+ * - Model persistence to .swarm/q-learning-model.json
+ *
  * @module q-learning-router
  */
+
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
+import { dirname, join } from 'path';
 
 /**
  * Q-Learning Router Configuration
@@ -21,10 +31,28 @@ export interface QLearningRouterConfig {
   explorationFinal: number;
   /** Exploration decay steps (default: 10000) */
   explorationDecay: number;
+  /** Exploration decay type (default: 'exponential') */
+  explorationDecayType: 'linear' | 'exponential' | 'cosine';
   /** Maximum states in Q-table (default: 10000) */
   maxStates: number;
   /** Number of actions/routes (default: 8) */
   numActions: number;
+  /** Experience replay buffer size (default: 1000) */
+  replayBufferSize: number;
+  /** Mini-batch size for replay (default: 32) */
+  replayBatchSize: number;
+  /** Enable experience replay (default: true) */
+  enableReplay: boolean;
+  /** Route cache size (default: 256) */
+  cacheSize: number;
+  /** Cache TTL in milliseconds (default: 300000 = 5 minutes) */
+  cacheTTL: number;
+  /** Model persistence path (default: '.swarm/q-learning-model.json') */
+  modelPath: string;
+  /** Auto-save interval in updates (default: 100) */
+  autoSaveInterval: number;
+  /** State space dimensionality for feature hashing (default: 64) */
+  stateSpaceDim: number;
 }
 
 /**
