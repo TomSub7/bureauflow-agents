@@ -150,38 +150,50 @@ function generateHooksConfig(config: HooksConfig): object {
   // PostToolUse hooks
   if (config.postToolUse) {
     hooks.PostToolUse = [
-      // File edit hooks with learning
+      // File edit hooks with neural pattern training
       {
         matcher: '^(Write|Edit|MultiEdit)$',
         hooks: [
           {
             type: 'command',
-            command: 'if [ -n "$TOOL_INPUT_file_path" ]; then npx claude-flow@v3alpha hooks post-edit --file "$TOOL_INPUT_file_path" --success "${TOOL_SUCCESS:-true}" 2>/dev/null; fi; exit 0',
+            command: 'npx @claude-flow/cli@latest hooks post-edit --file "$TOOL_INPUT_file_path" --success "$TOOL_SUCCESS" --train-patterns 2>/dev/null || true',
             timeout: config.timeout,
             continueOnError: config.continueOnError,
           },
         ],
       },
-      // Bash command hooks with metrics
+      // Bash command hooks with metrics and exit code tracking
       {
         matcher: '^Bash$',
         hooks: [
           {
             type: 'command',
-            command: 'if [ -n "$TOOL_INPUT_command" ]; then npx claude-flow@v3alpha hooks post-command --command "$TOOL_INPUT_command" --success "${TOOL_SUCCESS:-true}" 2>/dev/null; fi; exit 0',
+            command: 'npx @claude-flow/cli@latest hooks post-command --command "$TOOL_INPUT_command" --success "$TOOL_SUCCESS" --exit-code "$TOOL_EXIT_CODE" --track-metrics 2>/dev/null || true',
             timeout: config.timeout,
             continueOnError: config.continueOnError,
           },
         ],
       },
-      // Task completion hooks
+      // Task completion hooks with analysis
       {
         matcher: '^Task$',
         hooks: [
           {
             type: 'command',
-            command: 'if [ -n "$TOOL_RESULT_agent_id" ]; then npx claude-flow@v3alpha hooks post-task --task-id "$TOOL_RESULT_agent_id" --success "${TOOL_SUCCESS:-true}" 2>/dev/null; fi; exit 0',
+            command: 'npx @claude-flow/cli@latest hooks post-task --agent-id "$TOOL_RESULT_agent_id" --success "$TOOL_SUCCESS" --analyze 2>/dev/null || true',
             timeout: config.timeout,
+            continueOnError: config.continueOnError,
+          },
+        ],
+      },
+      // Search result caching for HNSW optimization
+      {
+        matcher: '^(Grep|Glob)$',
+        hooks: [
+          {
+            type: 'command',
+            command: 'npx @claude-flow/cli@latest hooks post-search --cache-results 2>/dev/null || true',
+            timeout: 2000,
             continueOnError: config.continueOnError,
           },
         ],
