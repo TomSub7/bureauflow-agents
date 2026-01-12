@@ -880,11 +880,12 @@ const hyperbolicCommand: Command = {
       switch (action) {
         case 'convert': {
           const vec = Array.isArray(input[0]) ? input[0] as number[] : input as number[];
-          const result = hyperbolic.euclideanToPoincare(vec, { curvature });
+          const rawResult = hyperbolic.euclideanToPoincare(vec, { curvature });
+          const result = Array.from(rawResult);
           output.writeln(output.success('Euclidean → Poincaré conversion:'));
           output.writeln();
           output.writeln(`Input (Euclidean):  [${vec.slice(0, 6).map(v => v.toFixed(4)).join(', ')}${vec.length > 6 ? ', ...' : ''}]`);
-          output.writeln(`Output (Poincaré):  [${result.slice(0, 6).map((v: number) => v.toFixed(4)).join(', ')}${result.length > 6 ? ', ...' : ''}]`);
+          output.writeln(`Output (Poincaré):  [${result.slice(0, 6).map(v => v.toFixed(4)).join(', ')}${result.length > 6 ? ', ...' : ''}]`);
           output.writeln(`Curvature: ${curvature}`);
           output.writeln(`Norm: ${Math.sqrt(result.reduce((s, v) => s + v * v, 0)).toFixed(6)} (must be < 1)`);
           return { success: true, data: { result } };
