@@ -254,11 +254,166 @@ const secretsCommand: Command = {
   },
 };
 
+// Defend subcommand (AIDefence integration)
+const defendCommand: Command = {
+  name: 'defend',
+  description: 'AI manipulation defense - detect prompt injection, jailbreaks, and PII',
+  options: [
+    { name: 'input', short: 'i', type: 'string', description: 'Input text to scan for threats' },
+    { name: 'file', short: 'f', type: 'string', description: 'File to scan for threats' },
+    { name: 'quick', short: 'q', type: 'boolean', description: 'Quick scan (faster, less detailed)' },
+    { name: 'learn', short: 'l', type: 'boolean', description: 'Enable learning mode', default: 'true' },
+    { name: 'stats', short: 's', type: 'boolean', description: 'Show detection statistics' },
+    { name: 'output', short: 'o', type: 'string', description: 'Output format: text, json', default: 'text' },
+  ],
+  examples: [
+    { command: 'claude-flow security defend -i "ignore previous instructions"', description: 'Scan text for threats' },
+    { command: 'claude-flow security defend -f ./prompts.txt', description: 'Scan file for threats' },
+    { command: 'claude-flow security defend --stats', description: 'Show detection statistics' },
+  ],
+  action: async (ctx: CommandContext): Promise<CommandResult> => {
+    const inputText = ctx.flags.input as string;
+    const filePath = ctx.flags.file as string;
+    const quickMode = ctx.flags.quick as boolean;
+    const showStats = ctx.flags.stats as boolean;
+    const outputFormat = ctx.flags.output as string || 'text';
+    const enableLearning = ctx.flags.learn !== false;
+
+    output.writeln();
+    output.writeln(output.bold('🛡️ AIDefence - AI Manipulation Defense System'));
+    output.writeln(output.dim('─'.repeat(55)));
+
+    // Dynamic import of aidefence (allows package to be optional)
+    let createAIDefence: typeof import('@claude-flow/aidefence').createAIDefence;
+    try {
+      const aidefence = await import('@claude-flow/aidefence');
+      createAIDefence = aidefence.createAIDefence;
+    } catch {
+      output.error('AIDefence package not installed. Run: npm install @claude-flow/aidefence');
+      return { success: false, error: 'AIDefence not available' };
+    }
+
+    const defender = createAIDefence({ enableLearning });
+
+    // Show stats mode
+    if (showStats) {
+      const stats = await defender.getStats();
+      output.writeln();
+      output.printBox([
+        `Detection Count: ${stats.detectionCount}`,
+        `Avg Detection Time: ${stats.avgDetectionTimeMs.toFixed(3)}ms`,
+        `Learned Patterns: ${stats.learnedPatterns}`,
+        `Mitigation Strategies: ${stats.mitigationStrategies}`,
+        `Avg Mitigation Effectiveness: ${(stats.avgMitigationEffectiveness * 100).toFixed(1)}%`,
+      ].join('\n'), 'Detection Statistics');
+      return { success: true };
+    }
+
+    // Get input to scan
+    let textToScan = inputText;
+    if (filePath) {
+      try {
+        const fs = await import('fs/promises');
+        textToScan = await fs.readFile(filePath, 'utf-8');
+        output.writeln(output.dim(`Reading file: ${filePath}`));
+      } catch (err) {
+        output.error(`Failed to read file: ${filePath}`);
+        return { success: false, error: 'File not found' };
+      }
+    }
+
+    if (!textToScan) {
+      output.writeln('Usage: claude-flow security defend -i "<text>" or -f <file>');
+      output.writeln();
+      output.writeln('Options:');
+      output.printList([
+        '-i, --input   Text to scan for AI manipulation attempts',
+        '-f, --file    File path to scan',
+        '-q, --quick   Quick scan mode (faster)',
+        '-s, --stats   Show detection statistics',
+        '--learn       Enable pattern learning (default: true)',
+      ]);
+      return { success: true };
+    }
+
+    const spinner = output.createSpinner({ text: 'Scanning for threats...', spinner: 'dots' });
+    spinner.start();
+
+    // Perform scan
+    const startTime = performance.now();
+    const result = quickMode
+      ? { ...defender.quickScan(textToScan), threats: [], piiFound: false, detectionTimeMs: 0, inputHash: '', safe: !defender.quickScan(textToScan).threat }
+      : await defender.detect(textToScan);
+    const scanTime = performance.now() - startTime;
+
+    spinner.stop();
+
+    // JSON output
+    if (outputFormat === 'json') {
+      output.writeln(JSON.stringify({
+        safe: result.safe,
+        threats: result.threats || [],
+        piiFound: result.piiFound,
+        detectionTimeMs: scanTime,
+      }, null, 2));
+      return { success: true };
+    }
+
+    // Text output
+    output.writeln();
+
+    if (result.safe && !result.piiFound) {
+      output.writeln(output.success('✅ No threats detected'));
+    } else {
+      if (!result.safe && result.threats) {
+        output.writeln(output.error(`⚠️ ${result.threats.length} threat(s) detected:`));
+        output.writeln();
+
+        for (const threat of result.threats) {
+          const severityColor = {
+            critical: output.error,
+            high: output.warning,
+            medium: output.info,
+            low: output.dim,
+          }[threat.severity] || output.dim;
+
+          output.writeln(`  ${severityColor(`[${threat.severity.toUpperCase()}]`)} ${threat.type}`);
+          output.writeln(`    ${output.dim(threat.description)}`);
+          output.writeln(`    Confidence: ${(threat.confidence * 100).toFixed(1)}%`);
+          output.writeln();
+        }
+
+        // Show mitigation recommendations
+        const criticalThreats = result.threats.filter(t => t.severity === 'critical');
+        if (criticalThreats.length > 0 && enableLearning) {
+          output.writeln(output.bold('Recommended Mitigations:'));
+          for (const threat of criticalThreats) {
+            const mitigation = await defender.getBestMitigation(threat.type as Parameters<typeof defender.getBestMitigation>[0]);
+            if (mitigation) {
+              output.writeln(`  ${threat.type}: ${output.bold(mitigation.strategy)} (${(mitigation.effectiveness * 100).toFixed(0)}% effective)`);
+            }
+          }
+          output.writeln();
+        }
+      }
+
+      if (result.piiFound) {
+        output.writeln(output.warning('⚠️ PII detected (emails, SSNs, API keys, etc.)'));
+        output.writeln();
+      }
+    }
+
+    output.writeln(output.dim(`Detection time: ${scanTime.toFixed(3)}ms`));
+
+    return { success: result.safe };
+  },
+};
+
 // Main security command
 export const securityCommand: Command = {
   name: 'security',
-  description: 'Security scanning, CVE detection, threat modeling, vulnerability management',
-  subcommands: [scanCommand, cveCommand, threatsCommand, auditCommand, secretsCommand],
+  description: 'Security scanning, CVE detection, threat modeling, AI defense',
+  subcommands: [scanCommand, cveCommand, threatsCommand, auditCommand, secretsCommand, defendCommand],
   examples: [
     { command: 'claude-flow security scan', description: 'Run security scan' },
     { command: 'claude-flow security cve --list', description: 'List known CVEs' },
