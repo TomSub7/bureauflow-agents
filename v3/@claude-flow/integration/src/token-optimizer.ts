@@ -32,6 +32,15 @@ interface EditOptimization {
   method: 'agent-booster' | 'traditional';
 }
 
+// Dynamic import helper to handle module resolution
+async function safeImport<T>(modulePath: string): Promise<T | null> {
+  try {
+    return await import(modulePath);
+  } catch {
+    return null;
+  }
+}
+
 /**
  * Token Optimizer - Reduces token usage via agentic-flow integration
  */
@@ -48,30 +57,31 @@ export class TokenOptimizer extends EventEmitter {
   private reasoningBank: any = null;
   private agentBooster: any = null;
   private configTuning: any = null;
+  private localCache = new Map<string, { data: any; timestamp: number }>();
 
   async initialize(): Promise<void> {
     try {
-      // Dynamic import of agentic-flow modules
-      const af = await import('agentic-flow').catch(() => null);
+      // Dynamic import of agentic-flow main module
+      const af = await safeImport<any>('agentic-flow');
 
       if (af) {
         this.agenticFlowAvailable = true;
 
-        // Load ReasoningBank
-        const rb = await import('agentic-flow/reasoningbank').catch(() => null);
-        if (rb) {
+        // Load ReasoningBank from dist path
+        const rb = await safeImport<any>('agentic-flow/dist/reasoningbank/index.js');
+        if (rb && rb.retrieveMemories) {
           this.reasoningBank = rb;
         }
 
-        // Load Agent Booster
-        const ab = await import('agentic-flow/optimizations/agent-booster-migration').catch(() => null);
-        if (ab) {
+        // Load Agent Booster from dist path
+        const ab = await safeImport<any>('agentic-flow/dist/optimizations/agent-booster-migration.js');
+        if (ab && ab.agentBoosterMigration) {
           this.agentBooster = ab.agentBoosterMigration;
         }
 
-        // Load Config Tuning
-        const ct = await import('agentic-flow/optimizations/configuration-tuning').catch(() => null);
-        if (ct) {
+        // Load Config Tuning from dist path
+        const ct = await safeImport<any>('agentic-flow/dist/optimizations/configuration-tuning.js');
+        if (ct && ct.configTuning) {
           this.configTuning = ct.configTuning;
         }
       }
@@ -79,7 +89,12 @@ export class TokenOptimizer extends EventEmitter {
       this.agenticFlowAvailable = false;
     }
 
-    this.emit('initialized', { agenticFlowAvailable: this.agenticFlowAvailable });
+    this.emit('initialized', {
+      agenticFlowAvailable: this.agenticFlowAvailable,
+      reasoningBank: !!this.reasoningBank,
+      agentBooster: !!this.agentBooster,
+      configTuning: !!this.configTuning,
+    });
   }
 
   /**
