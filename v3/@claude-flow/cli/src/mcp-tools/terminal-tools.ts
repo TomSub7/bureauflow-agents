@@ -145,8 +145,9 @@ export const terminalTools: MCPTool[] = [
         store.sessions[id] = session;
       }
 
-      // Simulate command execution
-      const output = `Simulated output for: ${command}`;
+      // NOTE: This is STATE TRACKING only - does not execute commands
+      // For real execution, use Claude Code's Bash tool
+      const output = `[STATE TRACKING] Command recorded: ${command}`;
       const exitCode = 0;
       const timestamp = new Date().toISOString();
 
