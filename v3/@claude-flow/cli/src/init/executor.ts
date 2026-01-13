@@ -580,7 +580,8 @@ function findSourceClaudeDir(sourceBaseDir?: string): string | null {
   }
 
   // IMPORTANT: Check the package's own .claude directory
-  const packageRoot = path.resolve(__dirname, '..', '..', '..', '..');
+  // Go up 3 levels: dist/src/init -> dist/src -> dist -> root
+  const packageRoot = path.resolve(__dirname, '..', '..', '..');
   const packageClaude = path.join(packageRoot, '.claude');
   if (fs.existsSync(packageClaude)) {
     possiblePaths.unshift(packageClaude); // Add to beginning (highest priority)
