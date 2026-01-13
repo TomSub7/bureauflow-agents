@@ -27,14 +27,21 @@ try {
     try {
       const service = embeddingsModule.createEmbeddingService({ provider: 'agentic-flow' });
       realEmbeddings = {
-        embed: async (text: string) => service.embed(text),
+        embed: async (text: string) => {
+          const result = await service.embed(text);
+          // Convert Float32Array to number[] if needed
+          return Array.from(result.embedding);
+        },
       };
       embeddingServiceName = 'agentic-flow';
     } catch {
       // Fall back to mock service
       const service = embeddingsModule.createEmbeddingService({ provider: 'mock' });
       realEmbeddings = {
-        embed: async (text: string) => service.embed(text),
+        embed: async (text: string) => {
+          const result = await service.embed(text);
+          return Array.from(result.embedding);
+        },
       };
       embeddingServiceName = 'mock';
     }
