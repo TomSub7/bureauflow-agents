@@ -323,6 +323,19 @@ export class EnhancedModelRouter {
   }
 
   /**
+   * Check if task contains Tier 3 (Opus) keywords
+   */
+  private containsTier3Keywords(task: string): { matches: boolean; count: number } {
+    let count = 0;
+    for (const pattern of TIER3_KEYWORDS) {
+      if (pattern.test(task)) {
+        count++;
+      }
+    }
+    return { matches: count > 0, count };
+  }
+
+  /**
    * Route a task to the optimal tier and handler
    */
   async route(task: string, context?: { filePath?: string }): Promise<EnhancedRouteResult> {
@@ -344,7 +357,24 @@ export class EnhancedModelRouter {
       }
     }
 
-    // Step 2: AST complexity analysis (if file path provided)
+    // Step 2: Check for Tier 3 keywords (architecture, security, distributed)
+    const tier3Check = this.containsTier3Keywords(task);
+    if (tier3Check.matches && tier3Check.count >= 2) {
+      // Strong signal for Opus - multiple complex keywords
+      return {
+        tier: 3,
+        handler: 'opus',
+        model: 'opus',
+        confidence: Math.min(0.95, 0.7 + tier3Check.count * 0.1),
+        complexity: 0.8 + tier3Check.count * 0.05,
+        reasoning: `High complexity task (${tier3Check.count} architectural keywords) - using opus`,
+        canSkipLLM: false,
+        estimatedLatencyMs: 5000,
+        estimatedCost: 0.015,
+      };
+    }
+
+    // Step 3: AST complexity analysis (if file path provided)
     let astComplexity: number | undefined;
     const targetFile = context?.filePath || this.extractFilePath(task);
 
@@ -356,15 +386,21 @@ export class EnhancedModelRouter {
       }
     }
 
-    // Step 3: Text-based complexity + tiny-dancer routing
+    // Step 4: Text-based complexity + tiny-dancer routing
     const tinyDancerResult = await this.tinyDancerRouter.route(task);
 
-    // Step 4: Combine AST complexity with tiny-dancer result
-    const finalComplexity = astComplexity !== undefined
+    // Step 5: Combine AST complexity with tiny-dancer result
+    // Also boost if single tier3 keyword found
+    let finalComplexity = astComplexity !== undefined
       ? (astComplexity + tinyDancerResult.complexity) / 2
       : tinyDancerResult.complexity;
 
-    // Step 5: Determine tier based on complexity
+    // Boost complexity if tier3 keywords found (even just one)
+    if (tier3Check.matches) {
+      finalComplexity = Math.min(1.0, finalComplexity + 0.25);
+    }
+
+    // Step 6: Determine tier based on complexity
     const { haiku, sonnet } = this.config.complexityThresholds;
 
     if (finalComplexity < haiku) {
