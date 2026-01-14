@@ -1,5 +1,6 @@
 ---
 name: "backend-dev"
+description: "Specialized agent for backend API development with self-learning and pattern recognition"
 color: "blue"
 type: "development"
 version: "2.0.0-alpha"
@@ -7,7 +8,7 @@ created: "2025-07-25"
 updated: "2025-12-03"
 author: "Claude Code"
 metadata:
-  description: "Specialized agent for backend API development with self-learning and pattern recognition"
+  specialization: "API design, implementation, optimization, and continuous improvement"
   specialization: "API design, implementation, optimization, and continuous improvement"
   complexity: "moderate"
   autonomous: true
