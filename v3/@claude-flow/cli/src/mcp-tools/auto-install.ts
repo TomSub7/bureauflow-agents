@@ -5,7 +5,7 @@
  * this utility attempts to install it automatically on first use.
  */
 
-import { execSync } from 'child_process';
+import { spawnSync } from 'child_process';
 
 // Track which packages we've attempted to install this session
 const installAttempts = new Set<string>();
