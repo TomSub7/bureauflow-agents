@@ -1324,17 +1324,66 @@ export const hooksTrajectoryEnd: MCPTool = {
   handler: async (params: Record<string, unknown>) => {
     const trajectoryId = params.trajectoryId as string;
     const success = params.success !== false;
+    const feedback = params.feedback as string | undefined;
+    const endedAt = new Date().toISOString();
+    const startTime = Date.now();
+
+    // Get and finalize real trajectory
+    const trajectory = activeTrajectories.get(trajectoryId);
+    let persistResult: { success: boolean; id?: string; error?: string } = { success: false };
+
+    if (trajectory) {
+      trajectory.success = success;
+      trajectory.endedAt = endedAt;
+
+      // Persist trajectory to database using real store
+      const storeFn = await getRealStoreFunction();
+      if (storeFn) {
+        try {
+          // Create trajectory summary for embedding
+          const summary = `Task: ${trajectory.task} | Agent: ${trajectory.agent} | Steps: ${trajectory.steps.length} | Success: ${success}${feedback ? ` | Feedback: ${feedback}` : ''}`;
+
+          persistResult = await storeFn({
+            key: `trajectory-${trajectoryId}`,
+            value: JSON.stringify({
+              ...trajectory,
+              feedback,
+            }),
+            namespace: 'trajectories',
+            generateEmbeddingFlag: true, // Generate embedding for semantic search
+            tags: [trajectory.agent, success ? 'success' : 'failure', 'sona-trajectory'],
+          });
+        } catch (error) {
+          persistResult = { success: false, error: error instanceof Error ? error.message : String(error) };
+        }
+      }
+
+      // Remove from active trajectories
+      activeTrajectories.delete(trajectoryId);
+    }
+
+    const learningTimeMs = Date.now() - startTime;
 
     return {
       trajectoryId,
       success,
-      ended: new Date().toISOString(),
+      ended: endedAt,
+      persisted: persistResult.success,
+      persistedId: persistResult.id,
       learning: {
-        sonaUpdate: true,
-        ewcConsolidation: success,
-        patternsExtracted: success ? 3 : 1,
-        learningTimeMs: 0.038,
+        sonaUpdate: persistResult.success, // Only true if actually persisted
+        ewcConsolidation: false, // Honest: EWC++ not yet implemented
+        patternsExtracted: trajectory?.steps.length || 0,
+        learningTimeMs,
       },
+      trajectory: trajectory ? {
+        task: trajectory.task,
+        agent: trajectory.agent,
+        totalSteps: trajectory.steps.length,
+        duration: trajectory.startedAt ? new Date(endedAt).getTime() - new Date(trajectory.startedAt).getTime() : 0,
+      } : null,
+      implementation: persistResult.success ? 'real-persistence' : 'memory-only',
+      note: persistResult.success ? 'Trajectory persisted with embeddings for future learning' : (persistResult.error || 'Trajectory not found or store unavailable'),
     };
   },
 };
