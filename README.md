@@ -171,7 +171,8 @@ Once added, Claude Code can use all 175+ claude-flow tools directly:
 - And 170+ more tools...
 
 
-### Why Claude-Flow v3?
+<details>
+<summary><h3>🆚 Why Claude-Flow v3? (Click to expand)</h3></summary>
 
 Claude-Flow v3 introduces **self-learning neural capabilities** that no other agent orchestration framework offers. While competitors require manual agent configuration and static routing, Claude-Flow learns from every task execution, prevents catastrophic forgetting of successful patterns, and intelligently routes work to specialized experts.
 
