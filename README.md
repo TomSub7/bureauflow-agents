@@ -259,26 +259,32 @@ Not every task needs the most powerful (and expensive) model. Claude-Flow analyz
 
 </details>
 
-### 📋 Specification-Driven Development (ADR/DDD)
+<details>
+<summary>📋 <strong>Spec-Driven Development</strong> — Build complete specs, implement without drift</summary>
 
-Claude-Flow v3 is built on rigorous architectural specifications with full traceability:
+Complex projects fail when implementation drifts from the original plan. Claude-Flow solves this with a spec-first approach: define your architecture through ADRs (Architecture Decision Records), organize code into DDD bounded contexts, and let the system enforce compliance as agents work. The result is implementations that match specifications — even across multi-agent swarms working in parallel.
+
+**How It Prevents Drift:**
+
+| Capability | What It Does |
+|------------|--------------|
+| 🎯 **Spec-First Planning** | Agents generate ADRs before writing code, capturing requirements and decisions |
+| 🔍 **Real-Time Compliance** | Statusline shows ADR compliance %, catches deviations immediately |
+| 🚧 **Bounded Contexts** | Each domain (Security, Memory, etc.) has clear boundaries agents can't cross |
+| ✅ **Validation Gates** | `hooks progress` blocks merges that violate specifications |
+| 🔄 **Living Documentation** | ADRs update automatically as requirements evolve |
+
+**Specification Features:**
 
 | Feature | Description |
 |---------|-------------|
-| **10 Architecture Decision Records** | ADR-001 to ADR-010 defining system behavior, integration patterns, and security requirements |
-| **Domain-Driven Design** | 5 bounded contexts (Core, Memory, Security, Integration, Coordination) with clean interfaces |
-| **Spec Compliance Tracking** | Real-time ADR compliance monitoring in statusline and CI/CD |
-| **Automated Validation** | `npx claude-flow@v3alpha hooks progress` checks ADR compliance |
-| **Living Documentation** | ADRs evolve with codebase, maintaining decision history |
+| **Architecture Decision Records** | 10 ADRs defining system behavior, integration patterns, and security requirements |
+| **Domain-Driven Design** | 5 bounded contexts with clean interfaces preventing cross-domain pollution |
+| **Automated Spec Generation** | Agents create specs from requirements using SPARC methodology |
+| **Drift Detection** | Continuous monitoring flags when code diverges from spec |
+| **Hierarchical Coordination** | Queen agent enforces spec compliance across all worker agents |
 
-**ADR Highlights:**
-- **ADR-001**: agentic-flow@alpha as foundation (eliminates 10,000+ duplicate lines)
-- **ADR-006**: Unified Memory Service with AgentDB
-- **ADR-008**: Vitest testing framework (10x faster than Jest)
-- **ADR-009**: Hybrid Memory Backend (SQLite + HNSW)
-- **ADR-026**: Intelligent 3-tier model routing
-
-**DDD Domains:**
+**DDD Bounded Contexts:**
 ```
 ┌─────────────┐  ┌─────────────┐  ┌─────────────┐
 │    Core     │  │   Memory    │  │  Security   │
@@ -292,6 +298,15 @@ Claude-Flow v3 is built on rigorous architectural specifications with full trace
 │ flow,MCP    │  │  Hive-Mind  │
 └─────────────┘  └─────────────┘
 ```
+
+**Key ADRs:**
+- **ADR-001**: agentic-flow@alpha as foundation (eliminates 10,000+ duplicate lines)
+- **ADR-006**: Unified Memory Service with AgentDB
+- **ADR-008**: Vitest testing framework (10x faster than Jest)
+- **ADR-009**: Hybrid Memory Backend (SQLite + HNSW)
+- **ADR-026**: Intelligent 3-tier model routing
+
+</details>
 
 ### 🏗️ Architecture Diagrams
 
