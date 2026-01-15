@@ -38,6 +38,7 @@ User → MCP Server → Router → Swarm → Agents → Memory → LLM Providers
 | **Embeddings** | ONNX Runtime, MiniLM | Local vector embeddings without API calls (75x faster) |
 | **Fine-tuning** | MicroLoRA, EWC++ | Lightweight model adaptation without full retraining |
 | **Providers** | Anthropic, OpenAI, Google, Ollama | AI models that power agent reasoning |
+| **Background** | Daemon, 12 Workers | Runs optimization, security audits, and learning in background |
 | **Learning Loop** | Hooks, Pattern Storage | Feeds results back to improve future routing |
 
 ### Task Routing
