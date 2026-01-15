@@ -1032,9 +1032,13 @@ npx claude-flow@v3alpha hooks progress --summary
 npx claude-flow@v3alpha progress --json
 ```
 
+</details>
+
 ---
 
-## Architecture
+<details>
+<summary><h2>🏗️ Architecture (Click to expand)</h2></summary>
+
 
 ### V3 Module Structure
 
