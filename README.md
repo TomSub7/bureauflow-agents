@@ -43,7 +43,7 @@ User → MCP Server → Router → Swarm → Agents → Memory → LLM Providers
 
 ---
 
-**Core Flow** — How requests move through the system
+🔄 **Core Flow** — How requests move through the system
 | Layer | Components | What It Does |
 |-------|------------|--------------|
 | User | Claude Code, CLI | Your interface to control and run commands |
