@@ -184,6 +184,7 @@ The init script creates these tables:
 
 | Table | Description |
 |-------|-------------|
+| `memory_entries` | Main memory storage (key-value with embeddings) |
 | `embeddings` | Content with vector embeddings |
 | `patterns` | Learned patterns (ReasoningBank) |
 | `agents` | Multi-agent memory coordination |
