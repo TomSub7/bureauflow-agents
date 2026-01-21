@@ -220,6 +220,8 @@ The system stores successful patterns in vector memory, learns from outcomes via
 <details>
 <summary>⚡ <strong>Optimization</strong> — How to reduce cost and latency</summary>
 
+Skip expensive LLM calls for simple tasks using WebAssembly transforms, and compress tokens to reduce API costs by 30-50%.
+
 | Layer | Components | What It Does |
 |-------|------------|--------------|
 | Agent Booster | WASM, AST analysis | Skips LLM for simple edits (<1ms) |
