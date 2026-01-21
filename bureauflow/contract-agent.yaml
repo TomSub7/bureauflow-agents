@@ -1,0 +1,86 @@
+# BureauFlow Contract Agent
+# Generates German legal documents
+
+name: contract-agent
+version: 1.0.0
+description: Generate German legal documents - AGBs, NDAs, employment contracts
+
+agent:
+  role: German Legal Document Generator
+    goal: Generate legally compliant German business documents
+      backstory: |
+          You are an expert in German business law (Handelsrecht, Arbeitsrecht, Vertragsrecht).
+              You generate documents that are compliant with German legal requirements.
+                  You always include required clauses for German law.
+
+                  templates:
+                    - id: agb
+                        name: Allgemeine Geschäftsbedingungen
+                            description: Terms and conditions for German businesses
+                                required_fields:
+                                      - company_name
+                                            - company_address
+                                                  - company_type
+                                                        - business_type
+
+                                                          - id: nda
+                                                              name: Geheimhaltungsvereinbarung
+                                                                  description: Non-disclosure agreement (German law)
+                                                                      required_fields:
+                                                                            - disclosing_party
+                                                                                  - receiving_party
+                                                                                        - purpose
+                                                                                              - duration_months
+
+                                                                                                - id: arbeitsvertrag
+                                                                                                    name: Arbeitsvertrag
+                                                                                                        description: Employment contract (German labor law compliant)
+                                                                                                            required_fields:
+                                                                                                                  - employer
+                                                                                                                        - employee_name
+                                                                                                                              - position
+                                                                                                                                    - start_date
+                                                                                                                                          - salary_gross
+                                                                                                                                                - hours_per_week
+                                                                                                                                                      - vacation_days
+                                                                                                                                                      
+                                                                                                                                                        - id: freelancer
+                                                                                                                                                            name: Freier Mitarbeiter Vertrag
+                                                                                                                                                                description: Freelancer contract (avoiding Scheinselbstaendigkeit)
+                                                                                                                                                                    required_fields:
+                                                                                                                                                                          - client
+                                                                                                                                                                                - contractor
+                                                                                                                                                                                      - scope_of_work
+                                                                                                                                                                                            - hourly_rate
+                                                                                                                                                                                                  - project_duration
+                                                                                                                                                                                                  
+                                                                                                                                                                                                    - id: auftragsverarbeitung
+                                                                                                                                                                                                        name: Auftragsverarbeitungsvertrag (AVV)
+                                                                                                                                                                                                            description: Data processing agreement (DSGVO Art. 28)
+                                                                                                                                                                                                                required_fields:
+                                                                                                                                                                                                                      - controller
+                                                                                                                                                                                                                            - processor
+                                                                                                                                                                                                                                  - data_types
+                                                                                                                                                                                                                                        - processing_purposes
+                                                                                                                                                                                                                                        
+                                                                                                                                                                                                                                        compliance:
+                                                                                                                                                                                                                                          - check: impressum_required
+                                                                                                                                                                                                                                              applies_to: [agb]
+                                                                                                                                                                                                                                                  description: AGBs must reference Impressum
+                                                                                                                                                                                                                                                  
+                                                                                                                                                                                                                                                    - check: widerrufsrecht
+                                                                                                                                                                                                                                                        applies_to: [agb]
+                                                                                                                                                                                                                                                            condition: business_type == "B2C"
+                                                                                                                                                                                                                                                                description: B2C requires 14-day withdrawal right
+                                                                                                                                                                                                                                                                
+                                                                                                                                                                                                                                                                  - check: arbeitsrecht
+                                                                                                                                                                                                                                                                      applies_to: [arbeitsvertrag]
+                                                                                                                                                                                                                                                                          description: Must comply with German employment law
+                                                                                                                                                                                                                                                                          
+                                                                                                                                                                                                                                                                            - check: scheinselbstaendigkeit
+                                                                                                                                                                                                                                                                                applies_to: [freelancer]
+                                                                                                                                                                                                                                                                                    description: Contract must avoid fake self-employment indicators
+                                                                                                                                                                                                                                                                                    
+                                                                                                                                                                                                                                                                                    output:
+                                                                                                                                                                                                                                                                                      formats: [markdown, pdf, docx]
+                                                                                                                                                                                                                                                                                        languages: [de, en]
