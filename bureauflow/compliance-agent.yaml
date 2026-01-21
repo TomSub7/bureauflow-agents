@@ -1,0 +1,93 @@
+# BureauFlow Compliance Agent
+# Checks and ensures German business compliance
+
+name: compliance-agent
+version: 1.0.0
+description: Automated German business compliance checks
+
+agent:
+  role: German Compliance Officer
+    goal: Ensure businesses meet all German legal requirements
+      backstory: |
+          You are an expert in German business compliance requirements.
+              You know DSGVO, TMG, GoBD, Handelsrecht, and all ongoing obligations.
+                  You help entrepreneurs stay compliant without expensive lawyers.
+
+                  checks:
+                    - id: impressum
+                        name: Impressum Check
+                            description: Verify website has complete Impressum
+                                severity: critical
+                                    required_for: [website, app]
+                                        fields:
+                                              - company_name
+                                                    - legal_form
+                                                          - address
+                                                                - contact_email
+                                                                      - contact_phone
+                                                                            - geschaeftsfuehrer
+                                                                                  - handelsregister
+                                                                                        - ust_idnr
+
+                                                                                          - id: datenschutz
+                                                                                              name: Datenschutzerklaerung Check
+                                                                                                  description: Verify DSGVO-compliant privacy policy
+                                                                                                      severity: critical
+                                                                                                          required_for: [website, app, saas]
+                                                                                                              must_include:
+                                                                                                                    - data_controller_info
+                                                                                                                          - purpose_of_processing
+                                                                                                                                - legal_basis
+                                                                                                                                      - data_retention_periods
+                                                                                                                                            - third_party_transfers
+                                                                                                                                                  - user_rights
+                                                                                                                                                        - cookie_policy
+                                                                                                                                                              - right_to_complain
+                                                                                                                                                              
+                                                                                                                                                                - id: cookie_consent
+                                                                                                                                                                    name: Cookie Consent Check
+                                                                                                                                                                        description: Verify cookie banner compliance
+                                                                                                                                                                            severity: high
+                                                                                                                                                                                required_for: [website, app]
+                                                                                                                                                                                    requirements:
+                                                                                                                                                                                          - opt_in_required
+                                                                                                                                                                                                - granular_choices
+                                                                                                                                                                                                      - no_pre_checked
+                                                                                                                                                                                                            - easy_reject
+                                                                                                                                                                                                                  - remember_choice
+                                                                                                                                                                                                                  
+                                                                                                                                                                                                                    - id: gobd
+                                                                                                                                                                                                                        name: GoBD Compliance
+                                                                                                                                                                                                                            description: Check bookkeeping compliance
+                                                                                                                                                                                                                                severity: high
+                                                                                                                                                                                                                                    required_for: [all_businesses]
+                                                                                                                                                                                                                                        requirements:
+                                                                                                                                                                                                                                              - unveraenderbar
+                                                                                                                                                                                                                                                    - nachvollziehbar
+                                                                                                                                                                                                                                                          - vollstaendig
+                                                                                                                                                                                                                                                                - zeitgerecht
+                                                                                                                                                                                                                                                                      - ordentlich
+                                                                                                                                                                                                                                                                      
+                                                                                                                                                                                                                                                                        - id: arbeitsrecht
+                                                                                                                                                                                                                                                                            name: Employment Law Compliance
+                                                                                                                                                                                                                                                                                description: Check employment law requirements
+                                                                                                                                                                                                                                                                                    severity: high
+                                                                                                                                                                                                                                                                                        required_for: [employers]
+                                                                                                                                                                                                                                                                                            checks:
+                                                                                                                                                                                                                                                                                                  - written_contracts
+                                                                                                                                                                                                                                                                                                        - minimum_wage_compliance
+                                                                                                                                                                                                                                                                                                              - working_time_records
+                                                                                                                                                                                                                                                                                                                    - vacation_minimum
+                                                                                                                                                                                                                                                                                                                          - sick_leave_policy
+                                                                                                                                                                                                                                                                                                                          
+                                                                                                                                                                                                                                                                                                                          monitoring:
+                                                                                                                                                                                                                                                                                                                            - check: impressum
+                                                                                                                                                                                                                                                                                                                                frequency: weekly
+                                                                                                                                                                                                                                                                                                                                  - check: datenschutz
+                                                                                                                                                                                                                                                                                                                                      frequency: monthly
+                                                                                                                                                                                                                                                                                                                                        - check: handelsregister
+                                                                                                                                                                                                                                                                                                                                            frequency: quarterly
+                                                                                                                                                                                                                                                                                                                                            
+                                                                                                                                                                                                                                                                                                                                            output:
+                                                                                                                                                                                                                                                                                                                                              report_format: [html, pdf, json]
+                                                                                                                                                                                                                                                                                                                                                languages: [de, en]
