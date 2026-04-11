@@ -1,0 +1,229 @@
+{
+  "generatedAt": "2026-04-11T11:35:22.532Z",
+  "agentPerformances": [
+    {
+      "agentName": "support-agent",
+      "hasMetrics": false,
+      "totalToolCalls": 0,
+      "totalErrors": 0,
+      "overallErrorRate": 0,
+      "totalDurationMs": 0,
+      "toolAnalysis": [],
+      "slowTools": [],
+      "highErrorTools": [],
+      "underusedTools": [
+        "lookup_faq",
+        "check_subscription",
+        "draft_follow_up"
+      ],
+      "healthScore": 50
+    },
+    {
+      "agentName": "email-agent",
+      "hasMetrics": false,
+      "totalToolCalls": 0,
+      "totalErrors": 0,
+      "overallErrorRate": 0,
+      "totalDurationMs": 0,
+      "toolAnalysis": [],
+      "slowTools": [],
+      "highErrorTools": [],
+      "underusedTools": [
+        "classify_email",
+        "report_cleanup"
+      ],
+      "healthScore": 50
+    },
+    {
+      "agentName": "lead-agent",
+      "hasMetrics": false,
+      "totalToolCalls": 0,
+      "totalErrors": 0,
+      "overallErrorRate": 0,
+      "totalDurationMs": 0,
+      "toolAnalysis": [],
+      "slowTools": [],
+      "highErrorTools": [],
+      "underusedTools": [
+        "check_recent_signups",
+        "score_lead",
+        "draft_follow_up"
+      ],
+      "healthScore": 50
+    },
+    {
+      "agentName": "ops-agent",
+      "hasMetrics": false,
+      "totalToolCalls": 0,
+      "totalErrors": 0,
+      "overallErrorRate": 0,
+      "totalDurationMs": 0,
+      "toolAnalysis": [],
+      "slowTools": [],
+      "highErrorTools": [],
+      "underusedTools": [
+        "health_check"
+      ],
+      "healthScore": 50
+    },
+    {
+      "agentName": "monitor-agent",
+      "hasMetrics": false,
+      "totalToolCalls": 0,
+      "totalErrors": 0,
+      "overallErrorRate": 0,
+      "totalDurationMs": 0,
+      "toolAnalysis": [],
+      "slowTools": [],
+      "highErrorTools": [],
+      "underusedTools": [
+        "health_check"
+      ],
+      "healthScore": 50
+    },
+    {
+      "agentName": "dedup-agent",
+      "hasMetrics": false,
+      "totalToolCalls": 0,
+      "totalErrors": 0,
+      "overallErrorRate": 0,
+      "totalDurationMs": 0,
+      "toolAnalysis": [],
+      "slowTools": [],
+      "highErrorTools": [],
+      "underusedTools": [
+        "check_if_done",
+        "mark_as_done",
+        "list_completed",
+        "find_redundancies"
+      ],
+      "healthScore": 50
+    }
+  ],
+  "suggestions": [
+    {
+      "priority": "P1",
+      "category": "data",
+      "agent": "all",
+      "description": "BUREAUFLOW_CONTEXT does not contain current demo phone (+4915888658328)",
+      "expectedImpact": "Agents may provide outdated information to users",
+      "suggestedAction": "Update the hardcoded value to match production"
+    },
+    {
+      "priority": "P2",
+      "category": "tools",
+      "agent": "support-agent",
+      "description": "Expected tool \"lookup_faq\" was never called",
+      "expectedImpact": "Agent may not be using its full capability",
+      "suggestedAction": "Verify \"lookup_faq\" is correctly registered and the system prompt instructs the agent to use it"
+    },
+    {
+      "priority": "P2",
+      "category": "tools",
+      "agent": "support-agent",
+      "description": "Expected tool \"check_subscription\" was never called",
+      "expectedImpact": "Agent may not be using its full capability",
+      "suggestedAction": "Verify \"check_subscription\" is correctly registered and the system prompt instructs the agent to use it"
+    },
+    {
+      "priority": "P2",
+      "category": "tools",
+      "agent": "support-agent",
+      "description": "Expected tool \"draft_follow_up\" was never called",
+      "expectedImpact": "Agent may not be using its full capability",
+      "suggestedAction": "Verify \"draft_follow_up\" is correctly registered and the system prompt instructs the agent to use it"
+    },
+    {
+      "priority": "P2",
+      "category": "tools",
+      "agent": "email-agent",
+      "description": "Expected tool \"classify_email\" was never called",
+      "expectedImpact": "Agent may not be using its full capability",
+      "suggestedAction": "Verify \"classify_email\" is correctly registered and the system prompt instructs the agent to use it"
+    },
+    {
+      "priority": "P2",
+      "category": "tools",
+      "agent": "email-agent",
+      "description": "Expected tool \"report_cleanup\" was never called",
+      "expectedImpact": "Agent may not be using its full capability",
+      "suggestedAction": "Verify \"report_cleanup\" is correctly registered and the system prompt instructs the agent to use it"
+    },
+    {
+      "priority": "P2",
+      "category": "tools",
+      "agent": "lead-agent",
+      "description": "Expected tool \"check_recent_signups\" was never called",
+      "expectedImpact": "Agent may not be using its full capability",
+      "suggestedAction": "Verify \"check_recent_signups\" is correctly registered and the system prompt instructs the agent to use it"
+    },
+    {
+      "priority": "P2",
+      "category": "tools",
+      "agent": "lead-agent",
+      "description": "Expected tool \"score_lead\" was never called",
+      "expectedImpact": "Agent may not be using its full capability",
+      "suggestedAction": "Verify \"score_lead\" is correctly registered and the system prompt instructs the agent to use it"
+    },
+    {
+      "priority": "P2",
+      "category": "tools",
+      "agent": "lead-agent",
+      "description": "Expected tool \"draft_follow_up\" was never called",
+      "expectedImpact": "Agent may not be using its full capability",
+      "suggestedAction": "Verify \"draft_follow_up\" is correctly registered and the system prompt instructs the agent to use it"
+    },
+    {
+      "priority": "P2",
+      "category": "tools",
+      "agent": "ops-agent",
+      "description": "Expected tool \"health_check\" was never called",
+      "expectedImpact": "Agent may not be using its full capability",
+      "suggestedAction": "Verify \"health_check\" is correctly registered and the system prompt instructs the agent to use it"
+    },
+    {
+      "priority": "P2",
+      "category": "tools",
+      "agent": "monitor-agent",
+      "description": "Expected tool \"health_check\" was never called",
+      "expectedImpact": "Agent may not be using its full capability",
+      "suggestedAction": "Verify \"health_check\" is correctly registered and the system prompt instructs the agent to use it"
+    },
+    {
+      "priority": "P2",
+      "category": "tools",
+      "agent": "dedup-agent",
+      "description": "Expected tool \"check_if_done\" was never called",
+      "expectedImpact": "Agent may not be using its full capability",
+      "suggestedAction": "Verify \"check_if_done\" is correctly registered and the system prompt instructs the agent to use it"
+    },
+    {
+      "priority": "P2",
+      "category": "tools",
+      "agent": "dedup-agent",
+      "description": "Expected tool \"mark_as_done\" was never called",
+      "expectedImpact": "Agent may not be using its full capability",
+      "suggestedAction": "Verify \"mark_as_done\" is correctly registered and the system prompt instructs the agent to use it"
+    },
+    {
+      "priority": "P2",
+      "category": "tools",
+      "agent": "dedup-agent",
+      "description": "Expected tool \"list_completed\" was never called",
+      "expectedImpact": "Agent may not be using its full capability",
+      "suggestedAction": "Verify \"list_completed\" is correctly registered and the system prompt instructs the agent to use it"
+    },
+    {
+      "priority": "P2",
+      "category": "tools",
+      "agent": "dedup-agent",
+      "description": "Expected tool \"find_redundancies\" was never called",
+      "expectedImpact": "Agent may not be using its full capability",
+      "suggestedAction": "Verify \"find_redundancies\" is correctly registered and the system prompt instructs the agent to use it"
+    }
+  ],
+  "staleDataFindings": [
+    "BUREAUFLOW_CONTEXT does not contain current demo phone (+4915888658328)"
+  ],
+  "overallHealthScore": 50
+}

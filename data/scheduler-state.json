@@ -1,0 +1,13 @@
+{
+  "agents": {
+    "lead-agent": {
+      "lastRunAt": "2026-04-11T11:36:11.087Z",
+      "lastRunMs": 34662,
+      "lastCostUsd": 0,
+      "lastStatus": "error",
+      "lastError": "Claude Code returned an error result: Failed to authenticate. API Error: 401 {\"type\":\"error\",\"error\":{\"type\":\"authentication_error\",\"message\":\"Invalid authentication credentials\"},\"request_id\":\"req_011CZwv2gN4fbDvWTnirEpwR\"}",
+      "totalRuns": 1
+    }
+  },
+  "schedulerStartedAt": "2026-04-11T11:35:36.424Z"
+}
