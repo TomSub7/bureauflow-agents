@@ -1,6 +1,18 @@
 {
   "lessons": [
     {
+      "id": "LESSON-ZERO-product-was-broken",
+      "date": "2026-04-11",
+      "category": "reality-check",
+      "severity": "CRITICAL",
+      "mistake": "All agents analyzed '0 paying customers' and concluded the problem was marketing, sales, outreach, or infrastructure. The REAL reason: the registration flow (/register) was broken with 504 errors from Feb 17 to April 9, 2026 — SIX WEEKS. Every prospect who clicked 'Registrieren' during all campaigns hit a server error. No amount of LinkedIn posts, forum threads, cold emails, or agent infrastructure would have produced a single customer when the product literally did not work.",
+      "rootCause": "JWT session bug — jwt() hit the database on every session check, causing 504 timeouts on the registration page. Fixed April 9 in commit bf0bae7. The product has only been functional for 2 days.",
+      "correctApproach": "ALWAYS verify the core product flow works BEFORE diagnosing marketing/sales failures. The first question on 0 customers should be: 'Can someone actually sign up?' — not 'Should we post on LinkedIn?' Registration works NOW (HTTP 200, verified April 11). The re-engagement campaign (April 15) is the correct FIRST action: apologize to the 94 people who tried and failed.",
+      "rule": "PRODUCT-WORKS-FIRST: Before ANY analysis of why there are no customers, verify the signup/payment flow end-to-end. A broken product makes all other advice irrelevant. This is LESSON ZERO — it overrides everything.",
+      "agentsAffected": ["ALL — every single agent missed this"],
+      "tags": ["product", "registration", "broken", "504", "reality-check", "lesson-zero"]
+    },
+    {
       "id": "icloud-cleanup-builtin-feature",
       "date": "2026-04-11",
       "category": "execution",

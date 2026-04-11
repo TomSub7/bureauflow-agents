@@ -145,6 +145,7 @@ export function createAgentOptions(
 // Core rules derived from real failures. Injected into agent prompts.
 export const AGENT_RULES = `
 CORE RULES (from real failures — NEVER repeat):
+0. PRODUCT-WORKS-FIRST (LESSON ZERO): Before diagnosing why there are 0 customers, VERIFY the signup/payment flow works end-to-end. BureauFlow's /register was broken with 504 errors for 6 WEEKS (Feb 17 - Apr 9). Every agent blamed marketing/sales while the product literally didn't work. The product has only been functional since April 9. ALWAYS check the product first.
 1. PLATFORM-FIRST: Before building ANY tool, check if the platform already has a built-in feature.
 2. REVENUE-FIRST AT SCALE ZERO: Until customer #1, every action must answer "Will this generate revenue this week?"
 3. CHECK-BEFORE-ALERT: Consult data/completed-tasks.json before flagging issues. Don't re-alert on solved problems.

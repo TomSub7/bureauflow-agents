@@ -139,6 +139,34 @@
       "completedAt": "2026-04-11",
       "status": "done",
       "tags": ["sentinel", "triage", "taxes", "false-alarm"]
+    },
+    {
+      "id": "auth-api-debug-session-2026-04-11",
+      "description": "CRITICAL P0 BUG: /api/auth/* hangs on Vercel production. 6 fix attempts, all deployed but none resolved. Root cause: likely ws WebSocket + Node 22 native WebSocket auto-detection in @neondatabase/serverless, possibly combined with Next.js function bundling. DB works from local (1s). Static pages + non-auth API routes work. ONLY auth routes hang. lib/db.ts currently has Pool+poolQueryViaFetch+webSocketConstructor=undefined. Need: (1) local next build to check for errors, (2) Vercel build logs, (3) test if auth worked BEFORE the ws import was added.",
+      "completedAt": "2026-04-11",
+      "status": "in-progress",
+      "tags": ["auth", "p0", "neon", "websocket", "vercel", "registration", "broken"]
+    },
+    {
+      "id": "icloud-cleanup-enabled-2026-04-11",
+      "description": "Enabled 3 iCloud Mail Cleanup rules via web UI: Clean Up Old Promotions (1yr), Clean Up Old Updates (1yr), Archive Old Transactions (1yr). Inbox dropped 96,378 → 86,278 (10,100 deleted) and still running. Rules are permanent — no maintenance needed.",
+      "completedAt": "2026-04-11",
+      "status": "done",
+      "tags": ["email", "icloud", "cleanup", "automated", "permanent"]
+    },
+    {
+      "id": "cron-reduction-27-to-8-2026-04-11",
+      "description": "Reduced Vercel crons from 27 to 8 per ops-agent recommendation. Kept: suppression-sync, daily-digest, vapi-credit-monitor, competitor-watch, reply-monitor, weekly-report, weekly-insights, email-campaigns. Code stays in repo.",
+      "completedAt": "2026-04-11",
+      "status": "done",
+      "tags": ["cron", "vercel", "optimization", "scale-zero"]
+    },
+    {
+      "id": "revenue-campaign-materials-2026-04-11",
+      "description": "Created 8 revenue action documents: RE-ENGAGEMENT-CAMPAIGN, NEW-PROSPECTS (20 leads), SEO-AUDIT, YOUTUBE-DEMO-SCRIPT-V2, FORUM-POSTS, METRICS, NOTEBOOKLM-STRATEGY, SYNTHESIA-AI-VIDEO-STRATEGY, COMPARISON-OUTREACH (6 editor emails), LinkedIn post draft.",
+      "completedAt": "2026-04-11",
+      "status": "done",
+      "tags": ["revenue", "marketing", "content", "campaigns"]
     }
   ]
 }
