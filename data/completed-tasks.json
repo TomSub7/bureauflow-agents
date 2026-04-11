@@ -1,0 +1,81 @@
+{
+  "tasks": [
+    {
+      "id": "secret-rotation-2026-04-04",
+      "description": "Rotated Stripe, Google OAuth, and Neon DB secrets across all environments",
+      "completedAt": "2026-04-04",
+      "status": "done",
+      "tags": ["security", "stripe", "google", "neon", "secrets"]
+    },
+    {
+      "id": "icloud-password-setup-2026-04-09",
+      "description": "Set up iCloud app-specific password for IMAP MCP integration",
+      "completedAt": "2026-04-09",
+      "status": "done",
+      "tags": ["email", "icloud", "imap", "mcp"]
+    },
+    {
+      "id": "email-routing-ops-2026-04-11",
+      "description": "Configured email routing to ops@bureauflow.de",
+      "completedAt": "2026-04-11",
+      "status": "done",
+      "tags": ["email", "routing", "ops", "dns"]
+    },
+    {
+      "id": "medium-emails-deleted-2026-04-11",
+      "description": "Bulk-deleted 56 Medium notification emails from inbox",
+      "completedAt": "2026-04-11",
+      "status": "done",
+      "tags": ["email", "cleanup", "medium", "spam"]
+    },
+    {
+      "id": "facebook-notifications-deleted-2026-04-11",
+      "description": "Bulk-deleted 20 Facebook notification emails from inbox",
+      "completedAt": "2026-04-11",
+      "status": "done",
+      "tags": ["email", "cleanup", "facebook", "spam"]
+    },
+    {
+      "id": "resend-domain-verification-2026-04-11",
+      "description": "Verified Resend domain DNS records for bureauflow.de",
+      "completedAt": "2026-04-11",
+      "status": "done",
+      "tags": ["email", "resend", "dns", "verification"]
+    },
+    {
+      "id": "gmail-drafts-sent-2026-04-11",
+      "description": "Sent 8 weekend plan emails from Gmail drafts",
+      "completedAt": "2026-04-11",
+      "status": "done",
+      "tags": ["email", "gmail", "outreach", "weekend-plan"]
+    },
+    {
+      "id": "agent-sdk-suite-created-2026-04-11",
+      "description": "Created BureauFlow Agent SDK suite with 4 agents: support, email, lead, orchestrator",
+      "completedAt": "2026-04-11",
+      "status": "done",
+      "tags": ["agents", "sdk", "infrastructure", "support", "email", "lead"]
+    },
+    {
+      "id": "python-imap-bulk-delete-2026-04-11",
+      "description": "Created Python IMAP bulk-delete script for mass email cleanup",
+      "completedAt": "2026-04-11",
+      "status": "done",
+      "tags": ["email", "python", "imap", "cleanup", "script"]
+    },
+    {
+      "id": "vercel-deployment-verified-2026-04-11",
+      "description": "Verified BureauFlow Vercel deployment is healthy and responding",
+      "completedAt": "2026-04-11",
+      "status": "done",
+      "tags": ["vercel", "deployment", "infrastructure", "health"]
+    },
+    {
+      "id": "adhd-accommodation-rule-2026-04-11",
+      "description": "Saved ADHD accommodation rule to MEMORY.md: Just Act, mistakes > inaction, no manual checklists",
+      "completedAt": "2026-04-11",
+      "status": "done",
+      "tags": ["memory", "adhd", "rules", "accommodation"]
+    }
+  ]
+}

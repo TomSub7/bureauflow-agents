@@ -1,0 +1,26 @@
+{
+  "name": "bureauflow-agents",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "BureauFlow Agent Suite — Customer support, email cleanup, and lead qualification agents built on Claude Agent SDK",
+  "scripts": {
+    "support": "npx tsx src/support-agent.ts",
+    "email-cleanup": "npx tsx src/email-agent.ts",
+    "email-cleanup-live": "npx tsx src/email-agent-live.ts",
+    "lead-qualify": "npx tsx src/lead-agent.ts",
+    "dedup": "npx tsx src/dedup-agent.ts",
+    "all": "npx tsx src/index.ts",
+    "monitor": "npx tsx src/monitor-agent.ts",
+    "ops": "npx tsx src/ops-agent.ts",
+    "typecheck": "npx tsc --noEmit"
+  },
+  "dependencies": {
+    "@anthropic-ai/claude-agent-sdk": "0.2.101",
+    "zod": "^4.0.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.0",
+    "typescript": "^5.5.0",
+    "@types/node": "^22.0.0"
+  }
+}
