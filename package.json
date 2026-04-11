@@ -12,6 +12,8 @@
     "all": "npx tsx src/index.ts",
     "monitor": "npx tsx src/monitor-agent.ts",
     "ops": "npx tsx src/ops-agent.ts",
+    "evolve": "npx tsx src/evolve-agent.ts",
+    "scheduler": "npx tsx src/proactive-scheduler.ts",
     "typecheck": "npx tsc --noEmit"
   },
   "dependencies": {
