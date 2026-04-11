@@ -20,7 +20,7 @@ import { z } from "zod/v4";
 import { readFileSync, writeFileSync, existsSync } from "node:fs";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
-import { MODEL, CEO_EMAIL, OPS_EMAIL, DEFAULT_MAX_TURNS } from "./config.js";
+import { MODEL, BUREAUFLOW_CONTEXT, CEO_EMAIL, OPS_EMAIL, DEFAULT_MAX_TURNS } from "./config.js";
 
 // ─── Data File Path ─────────────────────────────────────────────────
 
@@ -330,6 +330,9 @@ IDENTITY:
 - Role: FIRST agent consulted before any work begins
 - Language: English for internal ops
 - Style: Factual, precise, reference specific dates and task IDs
+
+PRODUCT KNOWLEDGE:
+${BUREAUFLOW_CONTEXT}
 
 WHY YOU EXIST:
 Tomas (CEO) has ADHD. Claude keeps rediscovering the same issues across sessions:

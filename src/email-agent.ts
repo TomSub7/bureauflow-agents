@@ -13,7 +13,7 @@
 
 import { query, tool, createSdkMcpServer } from "@anthropic-ai/claude-agent-sdk";
 import { z } from "zod/v4";
-import { MODEL, CEO_EMAIL, OPS_EMAIL, DEFAULT_MAX_TURNS } from "./config.js";
+import { MODEL, BUREAUFLOW_CONTEXT, CEO_EMAIL, OPS_EMAIL, DEFAULT_MAX_TURNS } from "./config.js";
 
 // ─── Safety Lists ────────────────────────────────────────────────────
 // NEVER auto-delete emails from these domains/senders
@@ -202,6 +202,9 @@ IDENTITY:
 - Purpose: Autonomously clean up Tomas Marty's inbox (CEO of BureauFlow)
 - Language: English for internal ops
 - Style: Efficient, no-nonsense, report results clearly
+
+PRODUCT KNOWLEDGE:
+${BUREAUFLOW_CONTEXT}
 
 CONTEXT:
 Tomas has ADHD. He needs his inbox clean but cannot do it himself.

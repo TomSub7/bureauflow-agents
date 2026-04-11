@@ -15,6 +15,7 @@ import {
   BUREAUFLOW_CONTEXT,
   OPS_EMAIL,
   CEO_EMAIL,
+  SUPPORT_EMAIL,
   DEFAULT_MAX_TURNS,
   DEFAULT_EFFORT,
 } from "./config.js";
