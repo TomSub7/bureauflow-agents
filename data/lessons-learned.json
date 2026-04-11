@@ -1,0 +1,78 @@
+{
+  "lessons": [
+    {
+      "id": "icloud-cleanup-builtin-feature",
+      "date": "2026-04-11",
+      "category": "execution",
+      "severity": "high",
+      "mistake": "Spent 4+ attempts trying to clean 96K iCloud emails via MCP (14/min), Python scripts (needs app password), Chrome UI search (crashes on 96K), and one-by-one deletion — when Apple's built-in 'iCloud Mail Cleanup' feature was visible in the sidebar the entire time.",
+      "rootCause": "Defaulted to building custom tools instead of first checking if the platform already solves the problem. Engineer mindset overrode practical thinking.",
+      "correctApproach": "ALWAYS check platform-native features FIRST before building custom solutions. iCloud Mail Cleanup → Settings → Cleanup deleted 10,000+ emails in minutes with 3 clicks. The feature also runs PERMANENTLY — no recurring maintenance.",
+      "rule": "PLATFORM-FIRST: Before building ANY automation, spend 2 minutes checking if the target platform already has a built-in feature for it. Check settings menus, help docs, and web search '[platform] bulk [action]' before writing a single line of code.",
+      "agentsAffected": ["email-agent", "dedup-agent", "evolve-agent"],
+      "tags": ["email", "icloud", "cleanup", "platform-native", "over-engineering"]
+    },
+    {
+      "id": "dedup-agent-wrong-account-search",
+      "date": "2026-04-11",
+      "category": "accuracy",
+      "severity": "medium",
+      "mistake": "Dedup agent searched iCloud IMAP for sent emails that were actually sent from Gmail (tomasmarty@bureauflow.io). Concluded '5 hot lead emails NOT SENT' when they were confirmed sent via Gmail at 10:57.",
+      "rootCause": "Dedup agent lacks awareness of multi-account email topology. It only has access to iCloud MCP, not Gmail MCP. It searched the wrong account and reported a false negative.",
+      "correctApproach": "Before declaring something 'not done', check ALL possible sources. Tomas has 4 email accounts (Gmail workspace, iCloud, Hotmail, Closers). The dedup agent should note which accounts it checked and flag uncertainty when it can't access all sources.",
+      "rule": "MULTI-SOURCE VERIFICATION: When checking if an action was completed, explicitly state which data sources were checked and which were NOT accessible. Never declare 'NOT DONE' without acknowledging blind spots.",
+      "agentsAffected": ["dedup-agent"],
+      "tags": ["dedup", "email", "multi-account", "false-negative"]
+    },
+    {
+      "id": "redundant-secret-rotation-alert",
+      "date": "2026-04-11",
+      "category": "redundancy",
+      "severity": "medium",
+      "mistake": "Security audit agent flagged Stripe/Google/Neon secrets in git history as needing rotation — but these were already rotated the previous week. Wasted Tomas's attention on a solved problem.",
+      "rootCause": "Security agent scanned git history (which is immutable) and reported findings without checking dedup task history. The rotation was logged in completed-tasks.json but the security agent didn't consult it.",
+      "correctApproach": "ALL agents should consult the dedup agent's completed-tasks.json BEFORE reporting findings. If a remediation was already done, say 'Previously resolved on [date]' instead of creating a new alert.",
+      "rule": "CHECK-BEFORE-ALERT: Before flagging any issue, check completed-tasks.json for prior resolution. Report 'Resolved on [date]' instead of re-alerting on known-fixed issues.",
+      "agentsAffected": ["monitor-agent", "evolve-agent", "dedup-agent"],
+      "tags": ["redundancy", "security", "secrets", "false-alarm"]
+    },
+    {
+      "id": "sentinel-self-referential-noise",
+      "date": "2026-04-11",
+      "category": "signal-vs-noise",
+      "severity": "medium",
+      "mistake": "FlowOps SENTINEL cron generated a '6 critical threats' alert that was mostly self-referential — its own previous alerts citing each other as threats. Tax Einspruch was already filed, 'missing Steuerberater' is Claude (per CFO mandate).",
+      "rootCause": "SENTINEL scans inbox emails including its own previous alerts, creating a feedback loop. It lacks context about business rules (Claude = accountant, Einspruch = filed).",
+      "correctApproach": "SENTINEL should exclude its own previous alerts from threat scanning (filter FROM: sentinel@flowops.bureauflow.de). It should also check completed-tasks.json for tax-related resolutions before alerting.",
+      "rule": "NO-SELF-REFERENCE: Monitoring agents must exclude their own previous outputs from analysis to prevent feedback loops. Always filter out self-generated content.",
+      "agentsAffected": ["monitor-agent"],
+      "tags": ["sentinel", "feedback-loop", "noise", "monitoring"]
+    },
+    {
+      "id": "asking-instead-of-acting",
+      "date": "2026-04-11",
+      "category": "behavior",
+      "severity": "high",
+      "mistake": "Repeatedly asked 'What's next?' and declared 'Done!' instead of proactively finding and executing the next highest-impact action. CEO with ADHD needs autonomous execution, not status reports.",
+      "rootCause": "Default assistant behavior is to wait for instructions. BureauFlow partnership requires deep autonomy — act first, report results, move to next action.",
+      "correctApproach": "After completing any task: (1) check revenue pipeline, (2) check inbox for replies, (3) run evolve agent for improvements, (4) check for stale data. Never stop. Never ask 'what's next'.",
+      "rule": "NEVER-IDLE: After completing a task, immediately identify and start the next highest-impact action. Prioritize: revenue > bugs > infrastructure > optimization. Report results inline, don't pause for approval.",
+      "agentsAffected": ["all"],
+      "tags": ["behavior", "autonomy", "adhd", "proactive"]
+    },
+    {
+      "id": "over-engineering-at-scale-zero",
+      "date": "2026-04-11",
+      "category": "priorities",
+      "severity": "high",
+      "mistake": "Built 16 TypeScript files, 5,278 lines of agent code, self-improvement systems, proactive schedulers — while BureauFlow has 0 paying customers. The agents are impressive but don't directly generate revenue.",
+      "rootCause": "Engineering is fun and feels productive. Revenue actions (posting Upwork job, sending comparison article emails, recording YouTube demo) require human execution and feel less satisfying.",
+      "correctApproach": "At scale zero, every action should be measured by: 'Does this get us closer to customer #1?' Building agent infrastructure is P2. Sending the re-engagement email campaign, posting the Upwork job, and emailing comparison article editors are P0.",
+      "rule": "REVENUE-FIRST AT SCALE ZERO: Until there is at least 1 paying customer, prioritize actions that directly drive signups and conversions over infrastructure improvements. Ask: 'Will this generate revenue this week?'",
+      "agentsAffected": ["all"],
+      "tags": ["priorities", "revenue", "scale-zero", "focus"]
+    }
+  ],
+  "lastUpdated": "2026-04-11T12:30:00Z",
+  "totalLessons": 6
+}

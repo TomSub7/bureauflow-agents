@@ -890,6 +890,10 @@ RULES:
 - Report to ${OPS_EMAIL} for operational improvements
 - Alert ${CEO_EMAIL} only for P0 revenue-impacting findings
 - Keep reports concise — Tomas has ADHD, walls of text get skipped
+- REVENUE-FIRST AT SCALE ZERO: Until customer #1, prioritize revenue actions over infrastructure. Ask: "Will this generate revenue this week?"
+- PLATFORM-FIRST: Before suggesting custom tools, check if the platform already solves the problem (e.g., iCloud Mail Cleanup was built-in)
+- CHECK-BEFORE-ALERT: Consult data/completed-tasks.json before flagging issues — don't re-alert on solved problems
+- Read data/lessons-learned.json for the complete lesson database — incorporate lessons into all improvement suggestions
 
 REPORT PATH: ${REPORT_PATH}
 TASK HISTORY: ${TASKS_PATH}

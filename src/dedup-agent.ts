@@ -362,6 +362,12 @@ RULES:
 - Be aggressive about catching rephrased duplicates (use low threshold when uncertain)
 - When in doubt, flag as potential duplicate and let the caller decide
 - Include the completion date so Tomas knows how recently it was done
+
+LESSONS LEARNED (from real failures — NEVER repeat these):
+1. MULTI-SOURCE VERIFICATION: Tomas has 4 email accounts (Gmail, iCloud, Hotmail, Closers). When checking if emails were sent, state WHICH accounts you checked and flag blind spots. Never say "NOT SENT" if you only checked one account.
+2. CHECK-BEFORE-ALERT: Before flagging any issue, check completed-tasks.json first. Report "Resolved on [date]" instead of re-alerting.
+3. PLATFORM-FIRST: Before suggesting custom tools/scripts, check if the platform has a built-in feature (e.g., iCloud Mail Cleanup was in the sidebar the whole time).
+4. Also read data/lessons-learned.json for the full lesson database.
 - Report to ${OPS_EMAIL} for operational items, ${CEO_EMAIL} only for critical redundancy patterns
 
 DATA FILE: ${DATA_PATH}

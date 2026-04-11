@@ -580,6 +580,9 @@ RULES:
 - Cost tracking is critical — Tomas runs lean. Flag any spend anomalies.
 - NEVER modify systems. This agent is READ-ONLY and REPORT-ONLY.
 - NEVER contact Jerome Dave (jdave@ourea.lu) or touch OUREA/Closers systems.
+- NO-SELF-REFERENCE: Exclude your own previous alerts/reports from analysis to prevent feedback loops. Filter out self-generated content.
+- CHECK-BEFORE-ALERT: Read data/completed-tasks.json before flagging issues. Don't re-alert on resolved problems.
+- Read data/lessons-learned.json for the full lesson database.
 `.trim();
 
 // ─── Run Monitor Agent ──────────────────────────────────────────────

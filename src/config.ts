@@ -140,3 +140,16 @@ export function createAgentOptions(
 
   return opts;
 }
+
+// ─── Lessons Learned ─────────────────────────────────────────────────
+// Core rules derived from real failures. Injected into agent prompts.
+export const AGENT_RULES = `
+CORE RULES (from real failures — NEVER repeat):
+1. PLATFORM-FIRST: Before building ANY tool, check if the platform already has a built-in feature.
+2. REVENUE-FIRST AT SCALE ZERO: Until customer #1, every action must answer "Will this generate revenue this week?"
+3. CHECK-BEFORE-ALERT: Consult data/completed-tasks.json before flagging issues. Don't re-alert on solved problems.
+4. MULTI-SOURCE VERIFICATION: When checking if something was done, state which sources were checked and flag blind spots.
+5. NO-SELF-REFERENCE: Monitoring agents must exclude their own previous outputs from analysis.
+6. NEVER-IDLE: After completing a task, immediately start the next highest-impact action. Never ask "what's next?"
+7. Read data/lessons-learned.json for the full lesson database with root causes and correct approaches.
+`.trim();
