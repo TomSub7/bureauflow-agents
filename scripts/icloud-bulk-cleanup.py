@@ -83,7 +83,6 @@ SPAM_SENDERS: list[str] = [
     "noreply@mail.pinterest.com",
     "noreply@email.coursera.org",
     "news@email.udemy.com",
-    "no-reply@accounts.google.com",
     "noreply@yelp.com",
     "no-reply@yelp.com",
     "info@meetup.com",
@@ -98,6 +97,14 @@ SPAM_SENDERS: list[str] = [
     "no-reply@dropboxmail.com",
     "hello@tiktok.com",
     "noreply@tiktok.com",
+
+    # --- Discovered by spam scanner (2026-04-11) ---
+    "newsletters-noreply@linkedin.com",    # 529 emails — LinkedIn newsletters
+    "asmallworld@newsletter.asw.com",      # 22 emails
+    "newsletter@m.batmaid.com",            # 14 emails
+    "newsletters@skift.com",               # 13 emails
+    "mailrobot@xing.com",                  # 12 emails — dead platform
+    "mailrobot@internations.org",          # 10 emails
 ]
 
 # Protected domains -- emails from these senders are NEVER deleted.
