@@ -18,6 +18,8 @@
 
 import { query, tool, createSdkMcpServer } from "@anthropic-ai/claude-agent-sdk";
 import { z } from "zod/v4";
+import { fileURLToPath } from "node:url";
+import process from "node:process";
 import { MODEL, CEO_EMAIL, OPS_EMAIL, DEFAULT_MAX_TURNS } from "./config.js";
 import { createGmailMcp } from "./mcp-connectors.js";
 
@@ -317,4 +319,7 @@ async function main() {
   }
 }
 
-main().catch(console.error);
+// Only run main() when invoked as the entrypoint.
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  main().catch(console.error);
+}

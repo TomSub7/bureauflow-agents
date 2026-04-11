@@ -8,7 +8,10 @@
  */
 
 import { query, tool, createSdkMcpServer } from "@anthropic-ai/claude-agent-sdk";
+import type { AgentDefinition } from "@anthropic-ai/claude-agent-sdk";
 import { z } from "zod/v4";
+import { fileURLToPath } from "node:url";
+import process from "node:process";
 import {
   MODEL,
   BUREAUFLOW_CONTEXT,
@@ -260,7 +263,7 @@ const generateOpsReport = tool(
 
 // ─── MCP Server (in-process) ─────────────────────────────────────────
 
-const opsMcp = createSdkMcpServer({
+export const opsMcp = createSdkMcpServer({
   name: "bureauflow-ops-tools",
   version: "1.0.0",
   tools: [checkCronStatus, getSystemHealth, generateOpsReport],
@@ -268,7 +271,7 @@ const opsMcp = createSdkMcpServer({
 
 // ─── System Prompt ───────────────────────────────────────────────────
 
-const SYSTEM_PROMPT = `
+export const OPS_SYSTEM_PROMPT = `
 You are the BureauFlow Operations Agent.
 
 IDENTITY:
@@ -319,7 +322,7 @@ async function main() {
     prompt: userQuery,
     options: {
       model: MODEL,
-      systemPrompt: SYSTEM_PROMPT,
+      systemPrompt: OPS_SYSTEM_PROMPT,
       mcpServers: { "bureauflow-ops-tools": opsMcp },
       maxTurns: DEFAULT_MAX_TURNS,
       effort: DEFAULT_EFFORT,
@@ -343,4 +346,18 @@ async function main() {
   }
 }
 
-main().catch(console.error);
+// Agent definition exported for orchestrator / scheduler use.
+// NOTE: `tools` is omitted so the subagent inherits all tools from the
+// parent (including bureauflow-ops-tools MCP).
+export const opsAgentDefinition: AgentDefinition = {
+  description:
+    "Operations agent that audits BureauFlow's automation landscape (27 Vercel crons, webhooks) and surfaces scheduling conflicts, stale jobs, and infrastructure health. Read-only / advisory.",
+  prompt: OPS_SYSTEM_PROMPT,
+  model: "sonnet",
+  maxTurns: DEFAULT_MAX_TURNS,
+};
+
+// Only run main() when invoked as the entrypoint.
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  main().catch(console.error);
+}

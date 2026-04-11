@@ -2,10 +2,13 @@
  * BureauFlow Agent Suite — Orchestrator
  *
  * Runs all agents as subagents of a single parent agent:
- * 0. Dedup Agent — redundancy detection (ALWAYS consulted FIRST)
- * 1. Support Agent — customer support for German tradespeople
- * 2. Email Agent — inbox cleanup automation
- * 3. Lead Agent — signup qualification and follow-up
+ * 0. Dedup Agent    — redundancy detection (ALWAYS consulted FIRST)
+ * 1. Support Agent  — customer support for German tradespeople
+ * 2. Email Agent    — inbox cleanup automation
+ * 3. Lead Agent     — signup qualification and follow-up
+ * 4. Monitor Agent  — infrastructure health checks + daily briefings
+ * 5. Ops Agent      — cron/webhook audit + automation landscape
+ * 6. Evolve Agent   — continuous improvement / agent self-analysis
  *
  * Usage: npx tsx src/index.ts
  *        npx tsx src/index.ts "Run lead qualification and email cleanup"
@@ -13,9 +16,16 @@
 
 import { query, tool, createSdkMcpServer } from "@anthropic-ai/claude-agent-sdk";
 import { z } from "zod/v4";
-import type { AgentDefinition } from "@anthropic-ai/claude-agent-sdk";
+import { fileURLToPath } from "node:url";
+import process from "node:process";
 import { MODEL, BUREAUFLOW_CONTEXT, OPS_EMAIL, CEO_EMAIL, DEFAULT_MAX_TURNS } from "./config.js";
 import { dedupAgentDefinition, dedupMcp } from "./dedup-agent.js";
+import { supportAgentDefinition, supportMcp } from "./support-agent.js";
+import { emailAgentDefinition, emailMcp } from "./email-agent.js";
+import { leadAgentDefinition, leadMcp } from "./lead-agent.js";
+import { monitorAgentDefinition, monitorMcp } from "./monitor-agent.js";
+import { opsAgentDefinition, opsMcp } from "./ops-agent.js";
+import { evolveAgentDefinition, evolveMcp } from "./evolve-agent.js";
 
 // ─── Health Check Tool ───────────────────────────────────────────────
 
@@ -60,64 +70,42 @@ const orchestratorMcp = createSdkMcpServer({
 });
 
 // ─── Subagent Definitions ────────────────────────────────────────────
-
-const dedupAgent: AgentDefinition = dedupAgentDefinition;
-
-const supportAgent: AgentDefinition = {
-  description:
-    "Customer support agent for German tradespeople using BureauFlow AI phone assistant SaaS. Answers product questions, troubleshoots issues, looks up FAQs, and escalates to humans when needed.",
-  prompt: `Du bist der BureauFlow Kundensupport-Agent. Antworte auf Deutsch.
-Produktwissen: ${BUREAUFLOW_CONTEXT}
-Regeln: FAQ suchen, Abo prüfen, klar antworten. Bei Problemen eskalieren an ${OPS_EMAIL}.
-Demo-Nummer: +49 158 886 583 28. Gutscheincode: GRUENDER50.`,
-  model: "sonnet",
-  maxTurns: 10,
-  tools: [], // Uses MCP tools only
-};
-
-const emailAgent: AgentDefinition = {
-  description:
-    "Email inbox cleanup agent that classifies, archives, and deletes spam/newsletter emails. Preserves all business-critical communications. Generates cleanup reports.",
-  prompt: `You are the BureauFlow Email Cleanup Agent. Tomas has ADHD — he needs a clean inbox but can't do it himself.
-RULES: Never delete from protected senders (Stripe, Vercel, Neon, GitHub, Anthropic, customers).
-When confidence < 0.7, KEEP the email. German emails from unknown senders are likely leads — KEEP.
-Workflow: Scan → Classify → Act → Report.`,
-  model: "sonnet",
-  maxTurns: 15,
-  tools: [],
-};
-
-const leadAgent: AgentDefinition = {
-  description:
-    "Lead qualification agent that monitors signups and sends follow-ups. Scores leads by trade, company size, and signup source. Alerts CEO for hot leads. Uses GRUENDER50 coupon for warm leads.",
-  prompt: `You are the BureauFlow Lead Qualification Agent.
-${BUREAUFLOW_CONTEXT}
-ICP Priority: Elektriker > Klempner > Dachdecker > SHK > Maler
-Scoring: Trade(5-30) + Source(5-35) + Company(+10) + Domain(+10) + Size(+15)
-Tiers: HOT(60+)=CEO alert, WARM(30-59)=nurture, COLD(<30)=welcome only
-RULE: Alejandro Cruz Libreros = BUSINESS PARTNER, not a lead!`,
-  model: "sonnet",
-  maxTurns: 12,
-  tools: [],
-};
+// The actual agent definitions (system prompts, tool hints, models) live
+// in each agent's own file. The orchestrator just imports and registers
+// them so subagents dispatch with the same context as their standalone
+// counterparts — no more drift between "subagent version" and "direct run".
 
 // ─── Orchestrator System Prompt ──────────────────────────────────────
 
 const SYSTEM_PROMPT = `
 You are the BureauFlow Operations Orchestrator.
 
-You coordinate four specialized agents:
-0. **dedup-agent** — Redundancy detection (ALWAYS consulted FIRST)
-1. **support-agent** — German-language customer support for tradespeople
-2. **email-agent** — Autonomous inbox cleanup and spam management
-3. **lead-agent** — Signup qualification and personalized follow-up
+You coordinate seven specialized agents (dispatch via the Task tool):
+0. **dedup-agent**    — Redundancy detection (ALWAYS consulted FIRST)
+1. **support-agent**  — German-language customer support for tradespeople
+2. **email-agent**    — Autonomous inbox cleanup and spam management
+3. **lead-agent**     — Signup qualification and personalized follow-up
+4. **monitor-agent**  — Infrastructure health checks + daily briefings
+5. **ops-agent**      — Cron/webhook audit + automation landscape
+6. **evolve-agent**   — Continuous improvement / agent self-analysis
+
+DISPATCH DECISION TABLE:
+- "Is this duplicate?" / "Was X already done?"         → dedup-agent
+- Customer question (DE/EN) / product / billing        → support-agent
+- "Clean inbox" / "classify emails" / newsletters      → email-agent
+- "New signups" / "score lead" / hot leads             → lead-agent
+- "Health check" / "is X up?" / daily briefing         → monitor-agent
+- "Cron status" / "automation audit" / scheduling      → ops-agent
+- "Improve agents" / "performance report" / stale data → evolve-agent
+- Never route customer-facing work to monitor/ops/evolve — they are
+  internal-only read-only agents. Never dispatch the same task to two
+  agents; pick the best fit.
 
 YOUR ROLE:
 - ALWAYS consult dedup-agent FIRST before dispatching any work
-- Route tasks to the right agent
-- Run health checks on infrastructure
-- Aggregate results and create summaries
-- Escalate critical issues to ${CEO_EMAIL}
+- Route each task to EXACTLY ONE agent based on the table above
+- Aggregate results into a clean summary for Tomas
+- Escalate revenue-impacting issues to ${CEO_EMAIL}
 - After any agent completes work, tell dedup-agent to mark it as done
 
 CONTEXT:
@@ -131,7 +119,7 @@ WORKFLOW:
 1. Understand what the user needs
 2. **DEDUP CHECK:** Send proposed tasks to dedup-agent to check for redundancy
 3. Skip any tasks flagged as already done — report them as "already completed on [date]"
-4. Dispatch novel tasks to appropriate subagent(s)
+4. Dispatch novel tasks to the appropriate subagent (one per task)
 5. If multiple tasks, run them in sequence
 6. **MARK DONE:** After each task completes, tell dedup-agent to log it
 7. Aggregate results into a clear summary
@@ -147,11 +135,15 @@ RULES:
 
 // ─── Run Orchestrator ────────────────────────────────────────────────
 
-async function main() {
-  const userPrompt =
-    process.argv.slice(2).join(" ") ||
-    "Run a complete operations check: qualify recent leads, then summarize the system health.";
-
+/**
+ * Run the orchestrator with a user prompt. All 7 subagents are registered
+ * with access to their own MCP servers, so dispatched work actually has
+ * tools available (not just text prompts).
+ *
+ * Exported so the proactive scheduler can dispatch real work through the
+ * orchestrator instead of firing raw queries with no context.
+ */
+export async function runOrchestrator(userPrompt: string): Promise<void> {
   console.log(`\n🚀 BureauFlow Agent Suite — Orchestrator`);
   console.log(`📋 Task: ${userPrompt}\n`);
 
@@ -161,14 +153,27 @@ async function main() {
       model: MODEL,
       systemPrompt: SYSTEM_PROMPT,
       agents: {
-        "dedup-agent": dedupAgent,
-        "support-agent": supportAgent,
-        "email-agent": emailAgent,
-        "lead-agent": leadAgent,
+        "dedup-agent": dedupAgentDefinition,
+        "support-agent": supportAgentDefinition,
+        "email-agent": emailAgentDefinition,
+        "lead-agent": leadAgentDefinition,
+        "monitor-agent": monitorAgentDefinition,
+        "ops-agent": opsAgentDefinition,
+        "evolve-agent": evolveAgentDefinition,
       },
       mcpServers: {
+        // Parent + dedup (always available) plus each subagent's MCP so
+        // dispatched work can actually call lookup_faq / classify_email /
+        // score_lead / check_infrastructure / check_cron_status /
+        // analyze_agent_performance.
         "bureauflow-orchestrator": orchestratorMcp,
         "bureauflow-dedup-tools": dedupMcp,
+        "bureauflow-support-tools": supportMcp,
+        "bureauflow-email-tools": emailMcp,
+        "bureauflow-lead-tools": leadMcp,
+        "bureauflow-monitor-tools": monitorMcp,
+        "bureauflow-ops-tools": opsMcp,
+        "bureauflow-evolve-tools": evolveMcp,
       },
       maxTurns: DEFAULT_MAX_TURNS * 2, // Orchestrator needs more turns
       effort: "high",
@@ -194,4 +199,15 @@ async function main() {
   }
 }
 
-main().catch(console.error);
+async function main() {
+  const userPrompt =
+    process.argv.slice(2).join(" ") ||
+    "Run a complete operations check: qualify recent leads, then summarize the system health.";
+
+  await runOrchestrator(userPrompt);
+}
+
+// Only run main() when invoked as the entrypoint.
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  main().catch(console.error);
+}

@@ -20,6 +20,7 @@ import { z } from "zod/v4";
 import { readFileSync, writeFileSync, existsSync } from "node:fs";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
+import process from "node:process";
 import { MODEL, BUREAUFLOW_CONTEXT, CEO_EMAIL, OPS_EMAIL, DEFAULT_MAX_TURNS } from "./config.js";
 
 // ─── Data File Path ─────────────────────────────────────────────────
@@ -376,13 +377,14 @@ DATA FILE: ${DATA_PATH}
 // ─── Exported Agent Definition ──────────────────────────────────────
 // Used by the orchestrator to include dedup as a subagent.
 
+// NOTE: `tools` is omitted so the subagent inherits all tools from the
+// parent (including bureauflow-dedup-tools MCP).
 export const dedupAgentDefinition = {
   description:
     "Redundancy detection agent that checks if proposed tasks were already completed in previous sessions. Maintains a persistent task log. ALWAYS consult this agent FIRST before dispatching work to other agents.",
   prompt: SYSTEM_PROMPT,
   model: "sonnet" as const,
   maxTurns: 8,
-  tools: [],
 };
 
 // ─── Run Agent (standalone) ─────────────────────────────────────────
@@ -425,4 +427,9 @@ async function main() {
   }
 }
 
-main().catch(console.error);
+// Only run main() when this file is invoked as the entrypoint — importing
+// it from the orchestrator (for dedupAgentDefinition / dedupMcp) must NOT
+// trigger a standalone dedup-agent run.
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  main().catch(console.error);
+}

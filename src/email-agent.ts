@@ -12,7 +12,10 @@
  */
 
 import { query, tool, createSdkMcpServer } from "@anthropic-ai/claude-agent-sdk";
+import type { AgentDefinition } from "@anthropic-ai/claude-agent-sdk";
 import { z } from "zod/v4";
+import { fileURLToPath } from "node:url";
+import process from "node:process";
 import { MODEL, BUREAUFLOW_CONTEXT, CEO_EMAIL, OPS_EMAIL, DEFAULT_MAX_TURNS } from "./config.js";
 
 // ─── Safety Lists ────────────────────────────────────────────────────
@@ -187,7 +190,7 @@ const reportCleanupResults = tool(
 
 // ─── MCP Server ──────────────────────────────────────────────────────
 
-const emailMcp = createSdkMcpServer({
+export const emailMcp = createSdkMcpServer({
   name: "bureauflow-email-tools",
   version: "1.0.0",
   tools: [classifyEmail, reportCleanupResults],
@@ -195,7 +198,7 @@ const emailMcp = createSdkMcpServer({
 
 // ─── System Prompt ───────────────────────────────────────────────────
 
-const SYSTEM_PROMPT = `
+export const EMAIL_SYSTEM_PROMPT = `
 You are the BureauFlow Email Cleanup Agent.
 
 IDENTITY:
@@ -250,7 +253,7 @@ async function main() {
     prompt,
     options: {
       model: MODEL,
-      systemPrompt: SYSTEM_PROMPT,
+      systemPrompt: EMAIL_SYSTEM_PROMPT,
       mcpServers: { "bureauflow-email-tools": emailMcp },
       maxTurns: DEFAULT_MAX_TURNS,
       effort: "medium",
@@ -276,4 +279,18 @@ async function main() {
   }
 }
 
-main().catch(console.error);
+// Agent definition exported for orchestrator / scheduler use.
+// NOTE: `tools` is omitted so the subagent inherits all tools from the
+// parent (including bureauflow-email-tools MCP).
+export const emailAgentDefinition: AgentDefinition = {
+  description:
+    "Email inbox cleanup agent that classifies emails, deletes spam/newsletters, preserves business-critical communications, and generates cleanup reports. Never deletes from protected senders.",
+  prompt: EMAIL_SYSTEM_PROMPT,
+  model: "sonnet",
+  maxTurns: 15,
+};
+
+// Only run main() when invoked as the entrypoint.
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  main().catch(console.error);
+}

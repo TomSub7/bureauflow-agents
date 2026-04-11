@@ -9,7 +9,10 @@
  */
 
 import { query, tool, createSdkMcpServer } from "@anthropic-ai/claude-agent-sdk";
+import type { AgentDefinition } from "@anthropic-ai/claude-agent-sdk";
 import { z } from "zod/v4";
+import { fileURLToPath } from "node:url";
+import process from "node:process";
 import {
   MODEL,
   BUREAUFLOW_CONTEXT,
@@ -121,7 +124,7 @@ const checkSubscriptionStatus = tool(
 
 // ─── MCP Server (in-process) ─────────────────────────────────────────
 
-const supportMcp = createSdkMcpServer({
+export const supportMcp = createSdkMcpServer({
   name: "bureauflow-support-tools",
   version: "1.0.0",
   tools: [lookupFaq, escalateToHuman, checkSubscriptionStatus],
@@ -129,7 +132,7 @@ const supportMcp = createSdkMcpServer({
 
 // ─── System Prompt ───────────────────────────────────────────────────
 
-const SYSTEM_PROMPT = `
+export const SUPPORT_SYSTEM_PROMPT = `
 Du bist der BureauFlow Kundensupport-Agent.
 
 IDENTITÄT:
@@ -177,7 +180,7 @@ async function main() {
     prompt: userQuestion,
     options: {
       model: MODEL,
-      systemPrompt: SYSTEM_PROMPT,
+      systemPrompt: SUPPORT_SYSTEM_PROMPT,
       mcpServers: { "bureauflow-support-tools": supportMcp },
       maxTurns: DEFAULT_MAX_TURNS,
       effort: DEFAULT_EFFORT,
@@ -202,4 +205,20 @@ async function main() {
   }
 }
 
-main().catch(console.error);
+// Agent definition exported for orchestrator / scheduler use.
+// NOTE: `tools` is omitted so the subagent inherits all tools from the
+// parent (including bureauflow-support-tools MCP). An empty array would
+// block ALL tool calls — that was the old "dispatch makes bad decisions"
+// bug where subagents had no FAQ lookup.
+export const supportAgentDefinition: AgentDefinition = {
+  description:
+    "Customer support agent for German tradespeople using BureauFlow. Answers product questions, troubleshoots issues, looks up FAQs, and escalates to humans when needed. Responds in German.",
+  prompt: SUPPORT_SYSTEM_PROMPT,
+  model: "sonnet",
+  maxTurns: 10,
+};
+
+// Only run main() when invoked as the entrypoint.
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  main().catch(console.error);
+}

@@ -5,6 +5,12 @@
  * interval. Tracks last run time in data/scheduler-state.json to avoid
  * re-running agents that already ran within their interval window.
  *
+ * Dispatch model: every scheduled tick is routed through the orchestrator
+ * (runOrchestrator in src/index.ts) so the prompt is actually handled by
+ * a subagent with full tool access. The previous implementation fired a
+ * toolless query() directly and every "run" was just plain LLM chatter
+ * with no MCP access — that was the "dispatch making bad decisions" bug.
+ *
  * Default schedule:
  * - evolve-agent:  every 24h (daily improvement check)
  * - monitor-agent: every 6h  (health check)
@@ -14,11 +20,11 @@
  * Usage: npx tsx src/proactive-scheduler.ts
  */
 
-import { query } from "@anthropic-ai/claude-agent-sdk";
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from "node:fs";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
-import { MODEL, DEFAULT_MAX_TURNS } from "./config.js";
+import process from "node:process";
+import { runOrchestrator } from "./index.js";
 
 // ─── File Paths ────────────────────────────────────────────────────
 
@@ -91,35 +97,22 @@ async function runAgent(
     }
   }
 
-  const prompt = agent.promptFn();
-  console.log(`  [RUN]  ${agent.name} — "${prompt.slice(0, 80)}..."`);
+  // Wrap the raw prompt so the orchestrator routes to the intended agent.
+  // Without this hint the orchestrator would pick whichever subagent best
+  // matched the text, which defeats the purpose of a per-agent schedule.
+  const rawPrompt = agent.promptFn();
+  const prompt = `Dispatch the following task to the ${agent.name} (and only that agent, after the mandatory dedup check). Task: ${rawPrompt}`;
+  console.log(`  [RUN]  ${agent.name} — "${rawPrompt.slice(0, 80)}..."`);
 
   const startMs = Date.now();
   let durationMs = 0;
-  let costUsd = 0;
+  const costUsd = 0;
   let status: "success" | "error" = "success";
   let errorMsg: string | undefined;
 
   try {
-    const conversation = query({
-      prompt,
-      options: {
-        model: MODEL,
-        maxTurns: DEFAULT_MAX_TURNS,
-        effort: "medium",
-        permissionMode: "bypassPermissions",
-        allowDangerouslySkipPermissions: true,
-        tools: [],
-        persistSession: false,
-      },
-    });
-
-    for await (const message of conversation) {
-      if (message.type === "result") {
-        durationMs = message.duration_ms;
-        costUsd = message.total_cost_usd;
-      }
-    }
+    await runOrchestrator(prompt);
+    durationMs = Date.now() - startMs;
   } catch (err) {
     status = "error";
     errorMsg = err instanceof Error ? err.message : String(err);
@@ -313,4 +306,7 @@ async function main() {
   }
 }
 
-main().catch(console.error);
+// Only run main() when invoked as the entrypoint.
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  main().catch(console.error);
+}

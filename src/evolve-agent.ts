@@ -21,6 +21,7 @@ import { z } from "zod/v4";
 import { readFileSync, writeFileSync, existsSync } from "node:fs";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
+import process from "node:process";
 import {
   MODEL,
   BUREAUFLOW_CONTEXT,
@@ -901,13 +902,14 @@ TASK HISTORY: ${TASKS_PATH}
 
 // ─── Exported Agent Definition ─────────────────────────────────────
 
+// NOTE: `tools` is omitted so the subagent inherits all tools from the
+// parent (including bureauflow-evolve-tools MCP).
 export const evolveAgentDefinition = {
   description:
     "Continuous improvement agent that analyzes all other agents' performance, identifies issues, and generates data-driven improvement reports. Run daily to maintain agent health.",
   prompt: SYSTEM_PROMPT,
   model: "sonnet" as const,
   maxTurns: 12,
-  tools: [],
 };
 
 // ─── Run Agent (standalone) ────────────────────────────────────────
@@ -950,4 +952,7 @@ async function main() {
   }
 }
 
-main().catch(console.error);
+// Only run main() when this file is invoked as the entrypoint.
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  main().catch(console.error);
+}

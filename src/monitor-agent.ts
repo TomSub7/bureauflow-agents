@@ -18,7 +18,10 @@
  */
 
 import { query, tool, createSdkMcpServer } from "@anthropic-ai/claude-agent-sdk";
+import type { AgentDefinition } from "@anthropic-ai/claude-agent-sdk";
 import { z } from "zod/v4";
+import { fileURLToPath } from "node:url";
+import process from "node:process";
 import {
   MODEL,
   BUREAUFLOW_CONTEXT,
@@ -533,7 +536,7 @@ const alertCeo = tool(
 
 // ─── MCP Server ─────────────────────────────────────────────────────
 
-const monitorMcp = createSdkMcpServer({
+export const monitorMcp = createSdkMcpServer({
   name: "bureauflow-monitor-tools",
   version: "1.0.0",
   tools: [checkAgentHealth, checkInfrastructure, checkCronHealth, generateDailyBriefing, alertCeo],
@@ -541,7 +544,7 @@ const monitorMcp = createSdkMcpServer({
 
 // ─── System Prompt ──────────────────────────────────────────────────
 
-const SYSTEM_PROMPT = `
+export const MONITOR_SYSTEM_PROMPT = `
 You are the BureauFlow Meta-Monitor Agent — an SRE-grade infrastructure supervisor.
 
 IDENTITY:
@@ -604,7 +607,7 @@ async function main() {
     prompt: userPrompt,
     options: {
       model: MODEL,
-      systemPrompt: SYSTEM_PROMPT,
+      systemPrompt: MONITOR_SYSTEM_PROMPT,
       mcpServers: { "bureauflow-monitor-tools": monitorMcp },
       maxTurns: DEFAULT_MAX_TURNS,
       effort: "high",
@@ -630,4 +633,18 @@ async function main() {
   }
 }
 
-main().catch(console.error);
+// Agent definition exported for orchestrator / scheduler use.
+// NOTE: `tools` is omitted so the subagent inherits all tools from the
+// parent (including bureauflow-monitor-tools MCP).
+export const monitorAgentDefinition: AgentDefinition = {
+  description:
+    "Infrastructure supervisor agent. Runs health checks on all BureauFlow services (website, DB, email, voice, payments), audits cron jobs, and generates executive briefings. Read-only and report-only.",
+  prompt: MONITOR_SYSTEM_PROMPT,
+  model: "sonnet",
+  maxTurns: DEFAULT_MAX_TURNS,
+};
+
+// Only run main() when invoked as the entrypoint.
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  main().catch(console.error);
+}

@@ -12,7 +12,10 @@
  */
 
 import { query, tool, createSdkMcpServer } from "@anthropic-ai/claude-agent-sdk";
+import type { AgentDefinition } from "@anthropic-ai/claude-agent-sdk";
 import { z } from "zod/v4";
+import { fileURLToPath } from "node:url";
+import process from "node:process";
 import {
   MODEL,
   BUREAUFLOW_CONTEXT,
@@ -264,7 +267,7 @@ const checkRecentSignups = tool(
 
 // ─── MCP Server ──────────────────────────────────────────────────────
 
-const leadMcp = createSdkMcpServer({
+export const leadMcp = createSdkMcpServer({
   name: "bureauflow-lead-tools",
   version: "1.0.0",
   tools: [scoreLead, draftFollowUp, checkRecentSignups],
@@ -272,7 +275,7 @@ const leadMcp = createSdkMcpServer({
 
 // ─── System Prompt ───────────────────────────────────────────────────
 
-const SYSTEM_PROMPT = `
+export const LEAD_SYSTEM_PROMPT = `
 You are the BureauFlow Lead Qualification Agent.
 
 IDENTITY:
@@ -343,7 +346,7 @@ async function main() {
     prompt,
     options: {
       model: MODEL,
-      systemPrompt: SYSTEM_PROMPT,
+      systemPrompt: LEAD_SYSTEM_PROMPT,
       mcpServers: { "bureauflow-lead-tools": leadMcp },
       maxTurns: DEFAULT_MAX_TURNS,
       effort: "high", // Lead qualification deserves deeper reasoning
@@ -369,4 +372,18 @@ async function main() {
   }
 }
 
-main().catch(console.error);
+// Agent definition exported for orchestrator / scheduler use.
+// NOTE: `tools` is omitted so the subagent inherits all tools from the
+// parent (including bureauflow-lead-tools MCP).
+export const leadAgentDefinition: AgentDefinition = {
+  description:
+    "Lead qualification agent that monitors signups, scores leads by trade/source/company signals, drafts personalized follow-ups, and alerts CEO for hot leads (60+). Uses GRUENDER50 for warm leads.",
+  prompt: LEAD_SYSTEM_PROMPT,
+  model: "sonnet",
+  maxTurns: 12,
+};
+
+// Only run main() when invoked as the entrypoint.
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  main().catch(console.error);
+}
