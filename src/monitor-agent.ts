@@ -494,7 +494,7 @@ ${additionalNotes ? `---\n\n## Additional Notes\n${additionalNotes}` : ""}
 
 const alertCeo = tool(
   "alert_ceo",
-  "Format an urgent alert for the CEO. Only use for truly critical issues: revenue-impacting outages, payment system failures, or complete service downtime. Routine issues go to ops@bureauflow.de instead.",
+  `Format an urgent alert for the CEO. Only use for truly critical issues: revenue-impacting outages, payment system failures, or complete service downtime. Routine issues go to ${OPS_EMAIL} instead.`,
   {
     severity: z.enum(["critical", "high"]).describe("Alert severity — only critical and high warrant CEO attention"),
     title: z.string().describe("Short alert title (one line)"),
@@ -514,7 +514,7 @@ const alertCeo = tool(
       timestamp: new Date().toISOString(),
       // In production: send via Resend to CEO_EMAIL
       // or push notification via webhook
-      delivery: "In production: sends email to tomasmarty@bureauflow.io via Resend",
+      delivery: `In production: sends email to ${CEO_EMAIL} via Resend`,
     };
 
     console.log(`\n${"!".repeat(60)}`);

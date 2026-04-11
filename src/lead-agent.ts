@@ -18,6 +18,7 @@ import {
   BUREAUFLOW_CONTEXT,
   OPS_EMAIL,
   CEO_EMAIL,
+  SUPPORT_EMAIL,
   DEFAULT_MAX_TURNS,
 } from "./config.js";
 
@@ -200,7 +201,7 @@ So starten Sie in 2 Minuten:
 2. Rufumleitung einrichten
 3. Fertig — die KI beantwortet ab sofort Ihre Anrufe
 
-Bei Fragen: info@bureauflow.de
+Bei Fragen: ${SUPPORT_EMAIL}
 
 Viele Grüße,
 Das BureauFlow Team`;
