@@ -118,6 +118,27 @@
       "completedAt": "2026-04-11",
       "status": "done",
       "tags": ["email", "spam", "cleanup", "linkedin", "newsletters"]
+    },
+    {
+      "id": "hot-lead-emails-sent-2026-04-11",
+      "description": "Sent 5 hot lead breakup emails from Gmail: Zahedi/MiLLo, Bubic, Jaensch, Gundelfinger, Wackerhagen. All confirmed delivered at 10:57.",
+      "completedAt": "2026-04-11",
+      "status": "done",
+      "tags": ["outreach", "leads", "gmail", "breakup-emails"]
+    },
+    {
+      "id": "vercel-duplicate-projects-identified-2026-04-11",
+      "description": "Identified 'platform' and 'bureauflow-docs' as accidental Vercel duplicates of bureauflow-app. Same repo, no env vars, failing every deploy. Need manual deletion from Vercel dashboard.",
+      "completedAt": "2026-04-11",
+      "status": "done",
+      "tags": ["vercel", "cleanup", "infrastructure", "duplicates"]
+    },
+    {
+      "id": "sentinel-alert-triaged-2026-04-11",
+      "description": "FlowOps SENTINEL alert triaged: self-referential noise. Tax Einspruch already filed (per tax-status file), Steuerberater = Claude (per CFO mandate). No real fires.",
+      "completedAt": "2026-04-11",
+      "status": "done",
+      "tags": ["sentinel", "triage", "taxes", "false-alarm"]
     }
   ]
 }
