@@ -76,6 +76,48 @@
       "completedAt": "2026-04-11",
       "status": "done",
       "tags": ["memory", "adhd", "rules", "accommodation"]
+    },
+    {
+      "id": "agent-suite-wave2-hooks-schemas-2026-04-11",
+      "description": "Added hooks.ts, schemas.ts, mcp-connectors.ts, monitor-agent.ts, email-agent-live.ts to agent suite",
+      "completedAt": "2026-04-11",
+      "status": "done",
+      "tags": ["agents", "hooks", "schemas", "mcp", "monitor"]
+    },
+    {
+      "id": "agent-suite-wave3-evolve-memory-2026-04-11",
+      "description": "Added evolve-agent.ts, memory.ts, proactive-scheduler.ts, dedup-agent.ts, ops-agent.ts, automation-map.ts",
+      "completedAt": "2026-04-11",
+      "status": "done",
+      "tags": ["agents", "evolve", "memory", "scheduler", "dedup", "ops"]
+    },
+    {
+      "id": "cron-collision-fix-2026-04-11",
+      "description": "Fixed cron scheduling collision: 3 jobs at 07:00 and 2 at 08:00 staggered by 5-10 min",
+      "completedAt": "2026-04-11",
+      "status": "done",
+      "tags": ["cron", "vercel", "fix", "scheduling"]
+    },
+    {
+      "id": "agents-live-tested-2026-04-11",
+      "description": "Ran all 6 agents live: support, lead, dedup, ops, monitor, evolve. All delivered. $2.65 total.",
+      "completedAt": "2026-04-11",
+      "status": "done",
+      "tags": ["agents", "testing", "live", "validation"]
+    },
+    {
+      "id": "security-audit-env-2026-04-11",
+      "description": "Security audit: .env.local safe (gitignored), secrets in git history already rotated last week",
+      "completedAt": "2026-04-11",
+      "status": "done",
+      "tags": ["security", "audit", "env", "gitignore"]
+    },
+    {
+      "id": "spam-senders-identified-2026-04-11",
+      "description": "Identified 600+ newsletter emails for bulk deletion: LinkedIn (529), ASW (22), Batmaid (14), Skift (13), XING (12), InterNations (10)",
+      "completedAt": "2026-04-11",
+      "status": "done",
+      "tags": ["email", "spam", "cleanup", "linkedin", "newsletters"]
     }
   ]
 }
