@@ -1,11 +1,35 @@
 {
   "agents": {
     "lead-agent": {
-      "lastRunAt": "2026-04-11T11:36:11.087Z",
-      "lastRunMs": 34662,
+      "lastRunAt": "2026-04-12T15:37:27.893Z",
+      "lastRunMs": 14800,
       "lastCostUsd": 0,
       "lastStatus": "error",
-      "lastError": "Claude Code returned an error result: Failed to authenticate. API Error: 401 {\"type\":\"error\",\"error\":{\"type\":\"authentication_error\",\"message\":\"Invalid authentication credentials\"},\"request_id\":\"req_011CZwv2gN4fbDvWTnirEpwR\"}",
+      "lastError": "Claude Code returned an error result: Failed to authenticate. API Error: 401 {\"type\":\"error\",\"error\":{\"type\":\"authentication_error\",\"message\":\"Invalid authentication credentials\"},\"request_id\":\"req_011CZz8EmWrwLnQiN4J6NTi1\"}",
+      "totalRuns": 5
+    },
+    "monitor-agent": {
+      "lastRunAt": "2026-04-12T17:35:52.342Z",
+      "lastRunMs": 15730,
+      "lastCostUsd": 0,
+      "lastStatus": "error",
+      "lastError": "Claude Code returned an error result: Failed to authenticate. API Error: 401 {\"type\":\"error\",\"error\":{\"type\":\"authentication_error\",\"message\":\"Invalid authentication credentials\"},\"request_id\":\"req_011CZzHGU8hRdE2PCSRZdsMB\"}",
+      "totalRuns": 3
+    },
+    "dedup-agent": {
+      "lastRunAt": "2026-04-11T23:35:50.848Z",
+      "lastRunMs": 14377,
+      "lastCostUsd": 0,
+      "lastStatus": "error",
+      "lastError": "Claude Code returned an error result: Failed to authenticate. API Error: 401 {\"type\":\"error\",\"error\":{\"type\":\"authentication_error\",\"message\":\"Invalid authentication credentials\"},\"request_id\":\"req_011CZxrugDLsQ8BKbV26qsfJ\"}",
+      "totalRuns": 1
+    },
+    "evolve-agent": {
+      "lastRunAt": "2026-04-12T11:35:57.013Z",
+      "lastRunMs": 20504,
+      "lastCostUsd": 0,
+      "lastStatus": "error",
+      "lastError": "Claude Code returned an error result: Failed to authenticate. API Error: 401 {\"type\":\"error\",\"error\":{\"type\":\"authentication_error\",\"message\":\"Invalid authentication credentials\"},\"request_id\":\"req_011CZyopTLwuTyN1WbNoLWj1\"}",
       "totalRuns": 1
     }
   },
