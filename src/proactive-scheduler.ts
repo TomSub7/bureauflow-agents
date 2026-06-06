@@ -14,11 +14,10 @@
  * Usage: npx tsx src/proactive-scheduler.ts
  */
 
-import { query } from "@anthropic-ai/claude-agent-sdk";
+import { spawn } from "node:child_process";
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from "node:fs";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
-import { MODEL, DEFAULT_MAX_TURNS } from "./config.js";
 
 // ─── File Paths ────────────────────────────────────────────────────
 
@@ -71,6 +70,26 @@ function saveState(state: SchedulerState): void {
 
 // ─── Agent Runner ──────────────────────────────────────────────────
 
+/**
+ * Spawn the real agent entrypoint (src/<name>.ts) as a child process.
+ * The agent scripts self-run on import, so they cannot be imported and
+ * called directly — running them as a subprocess invokes their actual
+ * system prompts, MCP tools, and logic.
+ */
+function spawnAgentScript(scriptPath: string): Promise<number> {
+  return new Promise((resolvePromise) => {
+    const child = spawn("npx", ["tsx", scriptPath], {
+      stdio: "inherit",
+      env: process.env,
+    });
+    child.on("close", (code) => resolvePromise(code ?? 1));
+    child.on("error", (err) => {
+      console.error(`  [ERR]  spawn failed: ${err.message}`);
+      resolvePromise(1);
+    });
+  });
+}
+
 async function runAgent(
   agent: ScheduledAgent,
   state: SchedulerState
@@ -91,58 +110,44 @@ async function runAgent(
     }
   }
 
-  const prompt = agent.promptFn();
-  console.log(`  [RUN]  ${agent.name} — "${prompt.slice(0, 80)}..."`);
+  console.log(`  [RUN]  ${agent.name} — "${agent.promptFn().slice(0, 80)}..."`);
 
   const startMs = Date.now();
-  let durationMs = 0;
-  let costUsd = 0;
   let status: "success" | "error" = "success";
   let errorMsg: string | undefined;
 
-  try {
-    const conversation = query({
-      prompt,
-      options: {
-        model: MODEL,
-        maxTurns: DEFAULT_MAX_TURNS,
-        effort: "medium",
-        permissionMode: "bypassPermissions",
-        allowDangerouslySkipPermissions: true,
-        tools: [],
-        persistSession: false,
-      },
-    });
-
-    for await (const message of conversation) {
-      if (message.type === "result") {
-        durationMs = message.duration_ms;
-        costUsd = message.total_cost_usd;
-      }
-    }
-  } catch (err) {
+  // Resolve the agent's entrypoint by convention: src/<name>.ts
+  const scriptPath = resolve(__dirname, `${agent.name}.ts`);
+  if (!existsSync(scriptPath)) {
     status = "error";
-    errorMsg = err instanceof Error ? err.message : String(err);
-    durationMs = Date.now() - startMs;
+    errorMsg = `entrypoint not found: ${scriptPath}`;
     console.error(`  [ERR]  ${agent.name} — ${errorMsg}`);
+  } else {
+    const exitCode = await spawnAgentScript(scriptPath);
+    if (exitCode !== 0) {
+      status = "error";
+      errorMsg = `exited with code ${exitCode}`;
+    }
   }
 
-  // Update state
-  const existing = state.agents[agent.name];
-  state.agents[agent.name] = {
+  const durationMs = Date.now() - startMs;
+
+  // Update state with a fresh read-modify-write so concurrent runs in daemon
+  // mode don't clobber each other's records (last-writer-wins on the whole file).
+  const fresh = loadState();
+  const prev = fresh.agents[agent.name];
+  fresh.agents[agent.name] = {
     lastRunAt: new Date().toISOString(),
     lastRunMs: durationMs,
-    lastCostUsd: costUsd,
+    // Cost is emitted on the child's stdout, not captured here.
+    lastCostUsd: 0,
     lastStatus: status,
     lastError: errorMsg,
-    totalRuns: (existing?.totalRuns ?? 0) + 1,
+    totalRuns: (prev?.totalRuns ?? 0) + 1,
   };
-  saveState(state);
+  saveState(fresh);
 
-  const costStr = costUsd > 0 ? `$${costUsd.toFixed(4)}` : "n/a";
-  console.log(
-    `  [DONE] ${agent.name} — ${status} in ${durationMs}ms (${costStr})`
-  );
+  console.log(`  [DONE] ${agent.name} — ${status} in ${durationMs}ms`);
 }
 
 // ─── Schedule Configuration ────────────────────────────────────────

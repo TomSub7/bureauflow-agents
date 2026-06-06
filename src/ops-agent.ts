@@ -9,13 +9,14 @@
 
 import { query, tool, createSdkMcpServer } from "@anthropic-ai/claude-agent-sdk";
 import { z } from "zod/v4";
+import { fileURLToPath } from "node:url";
 import {
-  MODEL,
   BUREAUFLOW_CONTEXT,
   OPS_EMAIL,
   CEO_EMAIL,
   DEFAULT_MAX_TURNS,
   DEFAULT_EFFORT,
+  createAgentOptions,
 } from "./config.js";
 import {
   CRON_JOBS,
@@ -260,7 +261,7 @@ const generateOpsReport = tool(
 
 // ─── MCP Server (in-process) ─────────────────────────────────────────
 
-const opsMcp = createSdkMcpServer({
+export const opsMcp = createSdkMcpServer({
   name: "bureauflow-ops-tools",
   version: "1.0.0",
   tools: [checkCronStatus, getSystemHealth, generateOpsReport],
@@ -318,15 +319,14 @@ async function main() {
   const conversation = query({
     prompt: userQuery,
     options: {
-      model: MODEL,
+      ...createAgentOptions({
+        agentName: "ops-agent",
+        maxTurns: DEFAULT_MAX_TURNS,
+        effort: DEFAULT_EFFORT,
+      }),
       systemPrompt: SYSTEM_PROMPT,
       mcpServers: { "bureauflow-ops-tools": opsMcp },
-      maxTurns: DEFAULT_MAX_TURNS,
-      effort: DEFAULT_EFFORT,
-      permissionMode: "bypassPermissions",
-      allowDangerouslySkipPermissions: true,
       tools: [],
-      persistSession: false,
     },
   });
 
@@ -343,4 +343,7 @@ async function main() {
   }
 }
 
-main().catch(console.error);
+// Only run as a standalone CLI; importing this module must not auto-run it.
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  main().catch(console.error);
+}

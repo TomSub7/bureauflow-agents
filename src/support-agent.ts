@@ -10,14 +10,15 @@
 
 import { query, tool, createSdkMcpServer } from "@anthropic-ai/claude-agent-sdk";
 import { z } from "zod/v4";
+import { fileURLToPath } from "node:url";
 import {
-  MODEL,
   BUREAUFLOW_CONTEXT,
   OPS_EMAIL,
   CEO_EMAIL,
   SUPPORT_EMAIL,
   DEFAULT_MAX_TURNS,
   DEFAULT_EFFORT,
+  createAgentOptions,
 } from "./config.js";
 
 // ─── Custom MCP Tools ────────────────────────────────────────────────
@@ -38,9 +39,26 @@ const lookupFaq = tool(
       gutschein: "GRUENDER50 = 50% auf den ersten Monat. Einfach bei der Registrierung eingeben.",
     };
 
+    // Keyword/synonym matching. Customer questions arrive in German, so each
+    // FAQ key carries a list of German (and a few English) trigger words. A
+    // FAQ matches if the question contains the key itself or any synonym.
+    const SYNONYMS: Record<string, string[]> = {
+      pricing: ["preis", "preise", "kosten", "kostet", "tarif", "plan", "pläne", "euro", "€", "abo", "monatlich"],
+      setup: ["einricht", "installation", "starten", "loslegen", "account", "registrier", "anmeld", "onboarding"],
+      weiterleitung: ["weiterleit", "rufumleitung", "umleitung", "nummer", "anrufweiterleitung"],
+      stornierung: ["kündig", "storno", "stornier", "beenden", "vertrag", "laufzeit"],
+      datenschutz: ["dsgvo", "daten", "gdpr", "av-vertrag", "datenschutz", "privacy"],
+      demo: ["demo", "test", "ausprobieren", "anrufen", "probe", "live"],
+      gutschein: ["gutschein", "code", "rabatt", "gründer", "gruender", "gruender50", "sparen", "coupon"],
+    };
+
     const q = question.toLowerCase();
     const matches = Object.entries(faqs)
-      .filter(([key]) => q.includes(key) || key.split("").some((_, i, arr) => q.includes(arr.slice(Math.max(0, i - 2), i + 3).join(""))))
+      .filter(
+        ([key]) =>
+          q.includes(key) ||
+          (SYNONYMS[key] ?? []).some((syn) => q.includes(syn))
+      )
       .map(([key, answer]) => `[${key}] ${answer}`);
 
     // Fuzzy: if no direct match, return all FAQs for the agent to pick from
@@ -121,7 +139,7 @@ const checkSubscriptionStatus = tool(
 
 // ─── MCP Server (in-process) ─────────────────────────────────────────
 
-const supportMcp = createSdkMcpServer({
+export const supportMcp = createSdkMcpServer({
   name: "bureauflow-support-tools",
   version: "1.0.0",
   tools: [lookupFaq, escalateToHuman, checkSubscriptionStatus],
@@ -176,15 +194,14 @@ async function main() {
   const conversation = query({
     prompt: userQuestion,
     options: {
-      model: MODEL,
+      ...createAgentOptions({
+        agentName: "support-agent",
+        maxTurns: DEFAULT_MAX_TURNS,
+        effort: DEFAULT_EFFORT,
+      }),
       systemPrompt: SYSTEM_PROMPT,
       mcpServers: { "bureauflow-support-tools": supportMcp },
-      maxTurns: DEFAULT_MAX_TURNS,
-      effort: DEFAULT_EFFORT,
-      permissionMode: "bypassPermissions",
-      allowDangerouslySkipPermissions: true,
-      tools: [],                       // No built-in tools — only our MCP
-      persistSession: false,           // Ephemeral support queries
+      tools: [], // No built-in tools — only our MCP
     },
   });
 
@@ -202,4 +219,8 @@ async function main() {
   }
 }
 
-main().catch(console.error);
+// Only run as a standalone CLI; importing this module (e.g. from jarvis.ts)
+// must not trigger a full agent run.
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  main().catch(console.error);
+}

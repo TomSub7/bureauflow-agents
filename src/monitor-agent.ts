@@ -19,6 +19,7 @@
 
 import { query, tool, createSdkMcpServer } from "@anthropic-ai/claude-agent-sdk";
 import { z } from "zod/v4";
+import { fileURLToPath } from "node:url";
 import {
   MODEL,
   BUREAUFLOW_CONTEXT,
@@ -29,6 +30,7 @@ import {
   VAPI_API_KEY,
   DEMO_PHONE,
   DEFAULT_MAX_TURNS,
+  createAgentOptions,
 } from "./config.js";
 
 // ─── Constants ──────────────────────────────────────────────────────
@@ -533,7 +535,7 @@ const alertCeo = tool(
 
 // ─── MCP Server ─────────────────────────────────────────────────────
 
-const monitorMcp = createSdkMcpServer({
+export const monitorMcp = createSdkMcpServer({
   name: "bureauflow-monitor-tools",
   version: "1.0.0",
   tools: [checkAgentHealth, checkInfrastructure, checkCronHealth, generateDailyBriefing, alertCeo],
@@ -603,15 +605,14 @@ async function main() {
   const conversation = query({
     prompt: userPrompt,
     options: {
-      model: MODEL,
+      ...createAgentOptions({
+        agentName: "monitor-agent",
+        maxTurns: DEFAULT_MAX_TURNS,
+        effort: "high",
+      }),
       systemPrompt: SYSTEM_PROMPT,
       mcpServers: { "bureauflow-monitor-tools": monitorMcp },
-      maxTurns: DEFAULT_MAX_TURNS,
-      effort: "high",
-      permissionMode: "bypassPermissions",
-      allowDangerouslySkipPermissions: true,
       tools: [],
-      persistSession: false,
     },
   });
 
@@ -630,4 +631,7 @@ async function main() {
   }
 }
 
-main().catch(console.error);
+// Only run as a standalone CLI; importing this module must not auto-run it.
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  main().catch(console.error);
+}

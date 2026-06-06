@@ -7,13 +7,14 @@
  * 3. Archives/deletes low-value emails
  * 4. Preserves all business-critical communications
  *
- * Usage: npx tsx src/email-agent.ts
- *        npx tsx src/email-agent.ts --dry-run
+ * Usage: npx tsx src/email-agent.ts            # dry run (default — no deletions)
+ *        npx tsx src/email-agent.ts --live      # actually delete/archive
  */
 
 import { query, tool, createSdkMcpServer } from "@anthropic-ai/claude-agent-sdk";
 import { z } from "zod/v4";
-import { MODEL, BUREAUFLOW_CONTEXT, CEO_EMAIL, OPS_EMAIL, DEFAULT_MAX_TURNS } from "./config.js";
+import { fileURLToPath } from "node:url";
+import { BUREAUFLOW_CONTEXT, CEO_EMAIL, OPS_EMAIL, DEFAULT_MAX_TURNS, createAgentOptions } from "./config.js";
 
 // ─── Safety Lists ────────────────────────────────────────────────────
 // NEVER auto-delete emails from these domains/senders
@@ -187,7 +188,7 @@ const reportCleanupResults = tool(
 
 // ─── MCP Server ──────────────────────────────────────────────────────
 
-const emailMcp = createSdkMcpServer({
+export const emailMcp = createSdkMcpServer({
   name: "bureauflow-email-tools",
   version: "1.0.0",
   tools: [classifyEmail, reportCleanupResults],
@@ -237,10 +238,12 @@ WORKFLOW:
 // ─── Run Agent ───────────────────────────────────────────────────────
 
 async function main() {
-  const isDryRun = process.argv.includes("--dry-run");
+  // Safety: deletions are off unless the operator explicitly passes --live.
+  const isLive = process.argv.includes("--live");
+  const isDryRun = !isLive;
 
   console.log(`\n📧 BureauFlow Email Cleanup Agent`);
-  console.log(`Mode: ${isDryRun ? "DRY RUN (no deletions)" : "LIVE"}\n`);
+  console.log(`Mode: ${isDryRun ? "DRY RUN (no deletions — pass --live to enable)" : "LIVE"}\n`);
 
   const prompt = isDryRun
     ? "Scan my inbox and classify emails. DO NOT delete anything — just report what you would do. This is a dry run."
@@ -249,15 +252,14 @@ async function main() {
   const conversation = query({
     prompt,
     options: {
-      model: MODEL,
+      ...createAgentOptions({
+        agentName: "email-agent",
+        maxTurns: DEFAULT_MAX_TURNS,
+        effort: "medium",
+      }),
       systemPrompt: SYSTEM_PROMPT,
       mcpServers: { "bureauflow-email-tools": emailMcp },
-      maxTurns: DEFAULT_MAX_TURNS,
-      effort: "medium",
-      permissionMode: "bypassPermissions",
-      allowDangerouslySkipPermissions: true,
       tools: [],
-      persistSession: false,
     },
   });
 
@@ -276,4 +278,7 @@ async function main() {
   }
 }
 
-main().catch(console.error);
+// Only run as a standalone CLI; importing this module must not auto-run it.
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  main().catch(console.error);
+}

@@ -13,13 +13,14 @@
 
 import { query, tool, createSdkMcpServer } from "@anthropic-ai/claude-agent-sdk";
 import { z } from "zod/v4";
+import { fileURLToPath } from "node:url";
 import {
-  MODEL,
   BUREAUFLOW_CONTEXT,
   OPS_EMAIL,
   CEO_EMAIL,
   SUPPORT_EMAIL,
   DEFAULT_MAX_TURNS,
+  createAgentOptions,
 } from "./config.js";
 
 // ─── Lead Scoring Model ──────────────────────────────────────────────
@@ -264,7 +265,7 @@ const checkRecentSignups = tool(
 
 // ─── MCP Server ──────────────────────────────────────────────────────
 
-const leadMcp = createSdkMcpServer({
+export const leadMcp = createSdkMcpServer({
   name: "bureauflow-lead-tools",
   version: "1.0.0",
   tools: [scoreLead, draftFollowUp, checkRecentSignups],
@@ -342,15 +343,14 @@ async function main() {
   const conversation = query({
     prompt,
     options: {
-      model: MODEL,
+      ...createAgentOptions({
+        agentName: "lead-agent",
+        maxTurns: DEFAULT_MAX_TURNS,
+        effort: "high", // Lead qualification deserves deeper reasoning
+      }),
       systemPrompt: SYSTEM_PROMPT,
       mcpServers: { "bureauflow-lead-tools": leadMcp },
-      maxTurns: DEFAULT_MAX_TURNS,
-      effort: "high", // Lead qualification deserves deeper reasoning
-      permissionMode: "bypassPermissions",
-      allowDangerouslySkipPermissions: true,
       tools: [],
-      persistSession: false,
     },
   });
 
@@ -369,4 +369,7 @@ async function main() {
   }
 }
 
-main().catch(console.error);
+// Only run as a standalone CLI; importing this module must not auto-run it.
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  main().catch(console.error);
+}
