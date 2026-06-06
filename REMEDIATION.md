@@ -82,7 +82,7 @@ self-improvement / observability layer while doing nothing at runtime.
   prompts to say "if Stripe/Calendar is configured." Deferred — needs live
   credentials to validate.
 
-### M5 — Orchestrator subagents have no tools 📋 Planned
+### M5 — Orchestrator subagents have no tools ✅ Fixed (via `jarvis.ts`)
 - **Root cause:** In `index.ts` the `support/email/lead` `AgentDefinition`s have
   `tools: []`, and the orchestrator `query()` only passes the orchestrator +
   dedup MCP servers. The per-agent MCP servers (`bureauflow-support-tools`,
@@ -90,9 +90,13 @@ self-improvement / observability layer while doing nothing at runtime.
 - **Impact:** In suite mode those subagents can only emit text — `lookup_faq`,
   `classify_email`, `score_lead` are unavailable.
 - **Severity:** Medium.
-- **Remediation plan:** Export each agent's MCP server and pass them all in the
-  orchestrator's `mcpServers`, or refactor agents to share a single tool
-  registry. Deferred — touches the orchestrator's subagent contract.
+- **Remediation:** Added `src/jarvis.ts`, a unified orchestrator. Each agent
+  was made safely importable (its `main()` is now guarded behind an
+  entrypoint check, so importing it no longer auto-runs the agent — this was
+  also a latent bug: `index.ts` importing `dedup-agent` already triggered a
+  dedup run). Jarvis registers every agent's MCP server and gives each
+  subagent an explicit `tools` allowlist of its `mcp__<server>__<tool>` names,
+  plus the external Perplexity/Firecrawl/glif servers when their keys are set.
 
 ---
 

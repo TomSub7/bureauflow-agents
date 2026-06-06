@@ -10,6 +10,7 @@
 
 import { query, tool, createSdkMcpServer } from "@anthropic-ai/claude-agent-sdk";
 import { z } from "zod/v4";
+import { fileURLToPath } from "node:url";
 import {
   BUREAUFLOW_CONTEXT,
   OPS_EMAIL,
@@ -138,7 +139,7 @@ const checkSubscriptionStatus = tool(
 
 // ─── MCP Server (in-process) ─────────────────────────────────────────
 
-const supportMcp = createSdkMcpServer({
+export const supportMcp = createSdkMcpServer({
   name: "bureauflow-support-tools",
   version: "1.0.0",
   tools: [lookupFaq, escalateToHuman, checkSubscriptionStatus],
@@ -218,4 +219,8 @@ async function main() {
   }
 }
 
-main().catch(console.error);
+// Only run as a standalone CLI; importing this module (e.g. from jarvis.ts)
+// must not trigger a full agent run.
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  main().catch(console.error);
+}

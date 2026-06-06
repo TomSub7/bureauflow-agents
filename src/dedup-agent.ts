@@ -424,4 +424,8 @@ async function main() {
   }
 }
 
-main().catch(console.error);
+// Only run as a standalone CLI; importing this module (index.ts, jarvis.ts)
+// must not trigger a full agent run.
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  main().catch(console.error);
+}

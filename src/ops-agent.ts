@@ -9,6 +9,7 @@
 
 import { query, tool, createSdkMcpServer } from "@anthropic-ai/claude-agent-sdk";
 import { z } from "zod/v4";
+import { fileURLToPath } from "node:url";
 import {
   BUREAUFLOW_CONTEXT,
   OPS_EMAIL,
@@ -260,7 +261,7 @@ const generateOpsReport = tool(
 
 // ─── MCP Server (in-process) ─────────────────────────────────────────
 
-const opsMcp = createSdkMcpServer({
+export const opsMcp = createSdkMcpServer({
   name: "bureauflow-ops-tools",
   version: "1.0.0",
   tools: [checkCronStatus, getSystemHealth, generateOpsReport],
@@ -342,4 +343,7 @@ async function main() {
   }
 }
 
-main().catch(console.error);
+// Only run as a standalone CLI; importing this module must not auto-run it.
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  main().catch(console.error);
+}

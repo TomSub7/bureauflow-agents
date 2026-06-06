@@ -10,6 +10,7 @@
     "lead-qualify": "npx tsx src/lead-agent.ts",
     "dedup": "npx tsx src/dedup-agent.ts",
     "all": "npx tsx src/index.ts",
+    "jarvis": "npx tsx src/jarvis.ts",
     "monitor": "npx tsx src/monitor-agent.ts",
     "ops": "npx tsx src/ops-agent.ts",
     "evolve": "npx tsx src/evolve-agent.ts",
