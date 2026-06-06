@@ -57,8 +57,10 @@ export function createGmailMcp(): McpStdioServerConfig {
       IMAP_PORT: "993",
       IMAP_SECURE: "true",
       SMTP_HOST: "smtp.gmail.com",
+      // Port 587 uses STARTTLS: the connection starts plaintext and upgrades,
+      // so SMTP_SECURE must be "false". (Use port 465 + "true" for implicit TLS.)
       SMTP_PORT: "587",
-      SMTP_SECURE: "true",
+      SMTP_SECURE: "false",
       EMAIL_USER: user,
       EMAIL_PASS: pass,
     },

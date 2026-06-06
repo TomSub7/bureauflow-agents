@@ -9,8 +9,8 @@
  * - In-process classify_email tool for AI classification logic
  * - In-process report_cleanup for result summaries
  *
- * Usage: npx tsx src/email-agent-live.ts
- *        npx tsx src/email-agent-live.ts --dry-run
+ * Usage: npx tsx src/email-agent-live.ts             # dry run (default)
+ *        npx tsx src/email-agent-live.ts --live       # actually delete
  *        npx tsx src/email-agent-live.ts --hours=48
  *
  * Requires: GMAIL_IMAP_USER + GMAIL_IMAP_APP_PASSWORD in .env
@@ -18,7 +18,7 @@
 
 import { query, tool, createSdkMcpServer } from "@anthropic-ai/claude-agent-sdk";
 import { z } from "zod/v4";
-import { MODEL, CEO_EMAIL, OPS_EMAIL, DEFAULT_MAX_TURNS } from "./config.js";
+import { CEO_EMAIL, OPS_EMAIL, DEFAULT_MAX_TURNS, createAgentOptions } from "./config.js";
 import { createGmailMcp } from "./mcp-connectors.js";
 
 // ─── Safety Lists ────────────────────────────────────────────────────
@@ -257,9 +257,13 @@ RULES:
 // ─── Run Agent ──────────────────────────────────────────────────────
 
 async function main() {
-  const isDryRun = process.argv.includes("--dry-run");
+  // Safety: this agent has REAL delete access to Gmail. Deletions are off
+  // unless the operator explicitly passes --live; --dry-run remains accepted.
+  const isLive = process.argv.includes("--live");
+  const isDryRun = !isLive;
   const hoursArg = process.argv.find((a) => a.startsWith("--hours="));
-  const hours = hoursArg ? parseInt(hoursArg.split("=")[1]!, 10) : 24;
+  const parsedHours = hoursArg ? parseInt(hoursArg.split("=")[1]!, 10) : 24;
+  const hours = Number.isFinite(parsedHours) && parsedHours > 0 ? parsedHours : 24;
 
   // Connect to real Gmail — will throw if env vars are missing
   let gmailMcp;
@@ -274,7 +278,7 @@ async function main() {
   }
 
   console.log(`\nBureauFlow Email Cleanup Agent (LIVE Gmail)`);
-  console.log(`Mode: ${isDryRun ? "DRY RUN (no deletions)" : "LIVE"}`);
+  console.log(`Mode: ${isDryRun ? "DRY RUN (no deletions — pass --live to enable)" : "LIVE"}`);
   console.log(`Scanning: last ${hours} hours`);
   console.log(`Account: ${process.env.GMAIL_IMAP_USER}\n`);
 
@@ -285,7 +289,11 @@ async function main() {
   const conversation = query({
     prompt,
     options: {
-      model: MODEL,
+      ...createAgentOptions({
+        agentName: "email-agent-live",
+        maxTurns: DEFAULT_MAX_TURNS + 10, // More turns needed for real email processing
+        effort: "high", // Careful classification deserves deeper reasoning
+      }),
       systemPrompt: SYSTEM_PROMPT,
       mcpServers: {
         // Real Gmail access via stdio MCP
@@ -293,12 +301,7 @@ async function main() {
         // In-process classification + reporting
         "bureauflow-email-classify": classifyMcp,
       },
-      maxTurns: DEFAULT_MAX_TURNS + 10, // More turns needed for real email processing
-      effort: "high", // Careful classification deserves deeper reasoning
-      permissionMode: "bypassPermissions",
-      allowDangerouslySkipPermissions: true,
       tools: [],
-      persistSession: false,
     },
   });
 

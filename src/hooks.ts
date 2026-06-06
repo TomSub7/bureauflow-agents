@@ -98,8 +98,13 @@ function createPreToolUseHook(agentName: string): HookCallback {
     // Record start time for duration tracking
     inflightTimers.set(tool_use_id, Date.now());
 
-    // Auto-approve known-safe tools
-    if (SAFE_TOOLS.has(tool_name)) {
+    // Auto-approve known-safe tools. In-process MCP tools are surfaced to
+    // hooks under their fully-qualified name (mcp__<server>__<tool>), so we
+    // match both the full name and the bare tool name after the last "__".
+    const bareToolName = tool_name.includes("__")
+      ? tool_name.slice(tool_name.lastIndexOf("__") + 2)
+      : tool_name;
+    if (SAFE_TOOLS.has(tool_name) || SAFE_TOOLS.has(bareToolName)) {
       return {
         continue: true,
         hookSpecificOutput: {

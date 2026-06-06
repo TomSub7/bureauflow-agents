@@ -24,7 +24,13 @@
  *   import { logInteraction, saveLearning, getLearning } from "./memory.js";
  */
 
-import { readFileSync, writeFileSync, existsSync, mkdirSync } from "node:fs";
+import {
+  readFileSync,
+  writeFileSync,
+  appendFileSync,
+  existsSync,
+  mkdirSync,
+} from "node:fs";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -119,18 +125,15 @@ export function logInteraction(entry: InteractionEntry): void {
     timestamp: entry.timestamp || new Date().toISOString(),
   });
 
-  // Read existing lines, append new one
-  const existing = readFileSync(INTERACTIONS_PATH, "utf-8");
-  const lines = existing ? existing.trimEnd().split("\n") : [];
-  lines.push(line);
+  // True append — no full rewrite on the common path.
+  appendFileSync(INTERACTIONS_PATH, line + "\n", "utf-8");
 
-  // Rotate: keep only the most recent MAX_INTERACTION_LINES
-  const trimmed =
-    lines.length > MAX_INTERACTION_LINES
-      ? lines.slice(lines.length - MAX_INTERACTION_LINES)
-      : lines;
-
-  writeFileSync(INTERACTIONS_PATH, trimmed.join("\n") + "\n", "utf-8");
+  // Rotate only when the cap is exceeded: read, trim oldest, rewrite once.
+  const lines = readFileSync(INTERACTIONS_PATH, "utf-8").trimEnd().split("\n");
+  if (lines.length > MAX_INTERACTION_LINES) {
+    const trimmed = lines.slice(lines.length - MAX_INTERACTION_LINES);
+    writeFileSync(INTERACTIONS_PATH, trimmed.join("\n") + "\n", "utf-8");
+  }
 }
 
 /**

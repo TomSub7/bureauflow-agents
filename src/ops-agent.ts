@@ -10,12 +10,12 @@
 import { query, tool, createSdkMcpServer } from "@anthropic-ai/claude-agent-sdk";
 import { z } from "zod/v4";
 import {
-  MODEL,
   BUREAUFLOW_CONTEXT,
   OPS_EMAIL,
   CEO_EMAIL,
   DEFAULT_MAX_TURNS,
   DEFAULT_EFFORT,
+  createAgentOptions,
 } from "./config.js";
 import {
   CRON_JOBS,
@@ -318,15 +318,14 @@ async function main() {
   const conversation = query({
     prompt: userQuery,
     options: {
-      model: MODEL,
+      ...createAgentOptions({
+        agentName: "ops-agent",
+        maxTurns: DEFAULT_MAX_TURNS,
+        effort: DEFAULT_EFFORT,
+      }),
       systemPrompt: SYSTEM_PROMPT,
       mcpServers: { "bureauflow-ops-tools": opsMcp },
-      maxTurns: DEFAULT_MAX_TURNS,
-      effort: DEFAULT_EFFORT,
-      permissionMode: "bypassPermissions",
-      allowDangerouslySkipPermissions: true,
       tools: [],
-      persistSession: false,
     },
   });
 

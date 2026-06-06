@@ -29,6 +29,7 @@ import {
   VAPI_API_KEY,
   DEMO_PHONE,
   DEFAULT_MAX_TURNS,
+  createAgentOptions,
 } from "./config.js";
 
 // ─── Constants ──────────────────────────────────────────────────────
@@ -603,15 +604,14 @@ async function main() {
   const conversation = query({
     prompt: userPrompt,
     options: {
-      model: MODEL,
+      ...createAgentOptions({
+        agentName: "monitor-agent",
+        maxTurns: DEFAULT_MAX_TURNS,
+        effort: "high",
+      }),
       systemPrompt: SYSTEM_PROMPT,
       mcpServers: { "bureauflow-monitor-tools": monitorMcp },
-      maxTurns: DEFAULT_MAX_TURNS,
-      effort: "high",
-      permissionMode: "bypassPermissions",
-      allowDangerouslySkipPermissions: true,
       tools: [],
-      persistSession: false,
     },
   });
 

@@ -14,12 +14,12 @@
 import { query, tool, createSdkMcpServer } from "@anthropic-ai/claude-agent-sdk";
 import { z } from "zod/v4";
 import {
-  MODEL,
   BUREAUFLOW_CONTEXT,
   OPS_EMAIL,
   CEO_EMAIL,
   SUPPORT_EMAIL,
   DEFAULT_MAX_TURNS,
+  createAgentOptions,
 } from "./config.js";
 
 // ─── Lead Scoring Model ──────────────────────────────────────────────
@@ -342,15 +342,14 @@ async function main() {
   const conversation = query({
     prompt,
     options: {
-      model: MODEL,
+      ...createAgentOptions({
+        agentName: "lead-agent",
+        maxTurns: DEFAULT_MAX_TURNS,
+        effort: "high", // Lead qualification deserves deeper reasoning
+      }),
       systemPrompt: SYSTEM_PROMPT,
       mcpServers: { "bureauflow-lead-tools": leadMcp },
-      maxTurns: DEFAULT_MAX_TURNS,
-      effort: "high", // Lead qualification deserves deeper reasoning
-      permissionMode: "bypassPermissions",
-      allowDangerouslySkipPermissions: true,
       tools: [],
-      persistSession: false,
     },
   });
 

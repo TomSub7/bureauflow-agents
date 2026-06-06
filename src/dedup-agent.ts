@@ -20,7 +20,7 @@ import { z } from "zod/v4";
 import { readFileSync, writeFileSync, existsSync } from "node:fs";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
-import { MODEL, BUREAUFLOW_CONTEXT, CEO_EMAIL, OPS_EMAIL, DEFAULT_MAX_TURNS } from "./config.js";
+import { BUREAUFLOW_CONTEXT, CEO_EMAIL, OPS_EMAIL, DEFAULT_MAX_TURNS, createAgentOptions } from "./config.js";
 
 // ─── Data File Path ─────────────────────────────────────────────────
 
@@ -398,15 +398,14 @@ async function main() {
   const conversation = query({
     prompt: userPrompt,
     options: {
-      model: MODEL,
+      ...createAgentOptions({
+        agentName: "dedup-agent",
+        maxTurns: DEFAULT_MAX_TURNS,
+        effort: "medium",
+      }),
       systemPrompt: SYSTEM_PROMPT,
       mcpServers: { "bureauflow-dedup-tools": dedupMcp },
-      maxTurns: DEFAULT_MAX_TURNS,
-      effort: "medium",
-      permissionMode: "bypassPermissions",
-      allowDangerouslySkipPermissions: true,
       tools: [],
-      persistSession: false,
     },
   });
 
